@@ -9,62 +9,29 @@ export default class Welcome extends Component{
     constructor(props) {
         super(props);
 
-        let user = '';
-
         this.state = {
-            user: user
-        }
-    }
-
-    componentDidMount() {
-        let user;
-        let token = getCookie("token");
-        if (token != "") {
-            let that = this;
-            
-            fetch("http://localhost:9000/checkToken?token="+token, {
-                method: 'GET',
-                query: token
-            }).then(res => {
-                if (res.status === 200) {
-                    res.json().then(data => {
-                        // console.log(data);
-                        user = data['email'];
-                        that.setState({user});
-                    })
-        
-                } else {
-                    console.log(document.cookie);
-                }
-            });
-        }
-    }
-
-    componentWillUnmount() {
-        if (getCookie('token') == "") {
-            this.setState({user: ""})
+            user: props.user,
         }
     }
 
     render() {
-        const {user} = this.state
+        const user = this.props.user
+
         return(
-            <div className="background" style={welcome}>
-            <Navbar />
+            <div className="main-content background" style={welcome}>
                 <div style={content}>
                     <h1>Welcome {user}</h1>
                     <Clock />
                 </div>
             </div>
-            // </div>
-        );
+        )
     }
 }
 
 let background = './img/background4.jpg';
 
 const welcome = {
-    height: "-webkit-calc(100%)",
+    height: "100vh",
     backgroundColor: "blue",
     backgroundImage: "url("+background+")",
     color: "white",

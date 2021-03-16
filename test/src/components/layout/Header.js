@@ -10,8 +10,7 @@ class Header extends React.Component {
       const title = this.props.title;
       return (
         <header style={head}>
-          <Navbar />
-          <h1 style={{marginTop: "1em"}}>{title}</h1>
+          <h1 style={{paddingTop: "1em"}}>{title}</h1>
         </header>
       );
     }
@@ -24,6 +23,7 @@ const head = {
   color: "white",
   paddingBottom: "1em",
   backgroundColor: "#0e0650"
+
 }
 
 export default Header;

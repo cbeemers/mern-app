@@ -17,5 +17,7 @@ const footer = {
     color: "white",
     textAlign: "center",
     // bottom: "0",
+    // position: "absolute",
+
     backgroundColor: "#0e0650",
 }

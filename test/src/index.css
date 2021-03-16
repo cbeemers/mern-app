@@ -14,10 +14,35 @@ aside {
   display: block;
 }
 
-.aside1, .aside2 {
+.aside1, .aside2, .welcome-aside {
  min-height: "-webkit-calc(100%)";
  color: white;
- min-width: 300px;
+}
+
+.aside1, .aside2 {
+  width: 300px;
+}
+
+.welcome-aside {
+  width: 250px;
+}
+
+.home-button {
+  margin-top: 2em;
+  width: 100%;
+  height: 4em;
+}
+
+.home-button:hover {
+  opacity: .7;
+}
+
+.link {
+  color: white;
+  text-decoration: none;
+}
+.link:hover {
+  text-decoration: none;
 }
 
 /* @media (min-width: 768px)
@@ -28,7 +53,7 @@ aside {
 .main {
   display: flex;
   flex: wrap;
-  min-height: 100vh;
+  min-height: -webkit-calc(100%);
 }
 
 .main-content {
@@ -58,6 +83,7 @@ aside {
   /* background-image: url("/img/background2.jpg"); */
   background-size: cover;
   background-position: 50% 50%;
+  /* height: 100vh; */
 }
 
 .background-contain {
@@ -82,9 +108,9 @@ aside {
   color: #170a49;
 }
 
-.buttons button:hover {
+/* .buttons button:hover {
 
-}
+} */
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
@@ -98,7 +124,17 @@ code {
 .form {
   text-align: center;
   margin: auto;
-  color: grey,
+  color: grey;
+}
+
+.friends-link:hover {
+  text-decoration: none;
+  opacity: .5;
+}
+
+.over:hover {
+  opacity: .85;
+
 }
 
 .graph {

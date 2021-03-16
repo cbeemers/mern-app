@@ -14,6 +14,7 @@ var usersRouter = require('./routes/users');
 // var testAPIRouter = require('./routes/testAPI');
 var weatherRouter = require('./routes/weather');
 var stockRouter = require('./routes/stock');
+var friendshipRouter = require('./routes/friendships');
 // var withAuth = require('./routes/middleware')
 
 require('dotenv').config();
@@ -21,9 +22,11 @@ const secret = process.env.SECRET;
 
 var app = express();
 const uri = process.env.ATLAS_URI;
-var db = mongoose.connect(uri, { useNewUrlParser: true, useCreateIndex: true });
+var db = mongoose.connect(uri, { useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true });
 
 const connection = mongoose.connection;
+
+
 connection.once('open', () => {
     console.log("MongoDB connection successful");
 });
@@ -76,7 +79,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-// app.use('/testAPI', testAPIRouter);
+app.use('/friendships', friendshipRouter);
 app.use('/weather', weatherRouter, cors());
 app.use('/stock', stockRouter);
 app.get('/checkToken', (req, res) => {

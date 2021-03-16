@@ -47,16 +47,13 @@ export default class Calendar extends Component {
 
         // Create an object that has each week of the current month
         for (let i=1; i<=date; i++) {
-            if (index<7) {
-                week[this.days[index]] = i;
-                index++;
-            } else {
-                weeks.push(week);
-                index=0;
-                week = {};
-                week[this.days[index]] = i;
-                index++;
+            if (index >= 7) {
+                weeks.push(week)
+                index = 0 
+                week = {}
             }
+            week[this.days[index]] = i
+            index++
         }
         // The week array is not empty and there were leftover days
         if (week != {}) {

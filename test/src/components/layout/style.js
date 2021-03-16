@@ -23,6 +23,13 @@ const calendar = {
     // marginBottom: "3em",
 }
 
+const displayed = {
+    padding: ".5em 0", 
+    borderBottom: ".1em black", 
+    borderBottomStyle:"solid", 
+    color: "black"
+}
+
 const form_style = {
     textAlign: "center",
     margin: "auto",
@@ -42,6 +49,10 @@ const msg = {
     color: "grey",
 }
 
+const profileContent = {
+    display:"inline"
+}
+
 const search = {
     textAlign: "center",
     padding: "2em 0",
@@ -59,4 +70,4 @@ const widget = {
 
 
 
-export {form_style, label, border, search, widget, account, msg, stockWidget, calendar};
+export {displayed, form_style, label, border, search, widget, account, msg, stockWidget, calendar, profileContent};

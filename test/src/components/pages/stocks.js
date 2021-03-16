@@ -64,7 +64,7 @@ export default class Stock extends Component {
     }
 
     componentDidMount() {
-        this.getFavorites();
+        // this.getFavorites();
     }
 
     setMonth = async (id) => {

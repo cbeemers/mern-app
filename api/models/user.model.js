@@ -25,7 +25,39 @@ const userSchema = new SCHEMA ({
     locations: {
       type: Array,
       required: false,
+    }, 
+    friends: {
+      type: Array,
+      required: true
+    },
+    messages: {
+      type: Array, 
+      required: true
+    }, 
+    firstName: {
+      type: String,
+      required: true
+    },
+    lastName: {
+      type: String,
+      required: true
+    },
+    requests: {
+      type: Array,
+      required: true
+    }, 
+    fullName: {
+      type: String, 
+      required: true,
+      index: true,
+    },
+    bio: {
+      type: String,
+      required: false,
     }
+    // picture {
+    //   type:  
+    // }
 },
     {
         timestamps: true

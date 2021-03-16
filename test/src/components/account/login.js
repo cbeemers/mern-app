@@ -47,6 +47,7 @@ class Login extends React.Component {
     
                     document.cookie = 'token' + "=" + "bearer " + data['token'];
                     that.props.history.push('/');
+                    window.location.reload()
 
                 });
                 
