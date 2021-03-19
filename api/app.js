@@ -6,8 +6,10 @@ var logger = require('morgan');
 var cors = require("cors");
 var mongoose = require("mongoose");
 const jwt = require('jsonwebtoken');
+const multer = require('multer')
+var AWS = require('aws-sdk')
 
-// console.log(db.collection("users"));
+
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');

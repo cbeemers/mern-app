@@ -81,19 +81,17 @@ export default class Home extends Component{
 
         let {token, userId, user, userLast} = this.state;
         let that = this;
-        console.log(userId)
 
         if (token != "") {
-            await fetch("http://localhost:9000/friendships/getAll?id="+userId+"&firstName="+user+"&lastName="+userLast, {
+            await fetch("http://localhost:9000/friendships/getAll?id="+userId, {
                 method: "GET",
                 headers: {
                     'Content-Type': 'application/json',
                 }
             }).then((res) => {
                 res.json().then(data => {
-                    console.log(data)
                     that.setState({
-                        display: <FriendsDisplay token={token} friends={data['data']} id={userId} firstName={user} lastName={userLast} />
+                        display: <FriendsDisplay display="friends" token={token} friends={data['data']} id={userId} firstName={user} lastName={userLast} query="" />
                     })
                 })
             })

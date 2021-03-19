@@ -40,10 +40,6 @@ export default class Stock extends Component {
             <CalendarWidget year={year} date={month + " " + day + " " + year} changeDate={this.changeDate} pagination={pagination} />
         );
 
-        if (getCookie("token") != "") {
-            this.getFavorites();
-        }
-
         this.state = {
             message: "",
             query: "",
@@ -60,11 +56,12 @@ export default class Stock extends Component {
             graph: null,
             addFavorite: null,
             favorites: [],
+            token: getCookie('token'),
         }
-    }
-
-    componentDidMount() {
-        // this.getFavorites();
+        
+        if (this.state.token != "") {
+            this.getFavorites();
+        }
     }
 
     setMonth = async (id) => {
@@ -83,17 +80,17 @@ export default class Stock extends Component {
         this.setState({ 
             query: event.target.value,
             json: null,
-            });
+        });
     }
 
     search = async () => {
-        let {query, date, json} = this.state
+        let {query, date, json, token} = this.state
         if (json == null) {
             const uri = 'http://localhost:9000/stock?symbol='+query;
             const response = await fetch(uri);
             json = await response.json();
         }
-        console.log(json);
+
         if (json["Error Message"]) {
             this.setState( {
                 message: "Invalid symbol",
@@ -112,7 +109,7 @@ export default class Stock extends Component {
         }
 
         let favorite = null;
-        if (getCookie("token") != "") {
+        if (token != "") {
             favorite = <button onClick={this.addFavorite} style={calendar}>Add Favorite</button>
         }
 
@@ -171,27 +168,22 @@ export default class Stock extends Component {
     }
 
     getFavorites = async() => {
-        let token = getCookie('token');
+        let {token} = this.state;
         let type = "stocks";
         let that = this;
 
-        await fetch("http://localhost:9000/users/getFromUser?type="+type+"&token="+token, {
-            method: "GET",
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        }).then((res) => {
-            res.json().then((data) => {
-                that.setState({favorites: data['values']});
-                // return data['values'];
-                // that.setFavorites(data['values']);
+        if (token != "") {
+            await fetch("http://localhost:9000/users/getFromUser?type="+type+"&token="+token, {
+                method: "GET",
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            }).then((res) => {
+                res.json().then((data) => {
+                    that.setState({favorites: data['values']});
+                });
             });
-        });
-    }
-
-    setFavorites = (favorites) => {
-
-        this.state ={favorites: favorites};
+        }
     }
 
     drop = () => {

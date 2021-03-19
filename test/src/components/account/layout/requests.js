@@ -55,16 +55,15 @@ export default class RequestsDisplay extends Component {
         let count
     
         if (action == "accept") {
-            await fetch("http://localhost:9000/friendships/exists?sender_id="+userId+"&added_id="+_id, {
+            await fetch("http://localhost:9000/friendships/exists?senderId="+userId+"&addedId="+_id, {
                 method: "GET", 
                 headers: {
                     'Content-Type': 'application/json'
                 }
             }).then(res => {
                 res.json().then(async data => {
-                    count = data['count']
-                    if (count == 0) {
-                        console.log(first, last, userId, _id, userFirst, userLast)
+                    if (data['result'] != "found") {
+                        console.log(data['result'])
                         await fetch("http://localhost:9000/friendships/add?added_id="+_id+"&added_first="+first+"&added_last="+last+"&sender_id="+userId+"&sender_first="+userFirst+"&sender_last="+userLast, {
                             method: "POST",
                             headers: {

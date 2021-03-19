@@ -10,9 +10,9 @@ export default class FriendsDisplay extends Component {
 
         this.state = {
             friends: props.friends,
-            query: "",
+            query: props.query,
             searchResults: [],
-            display: "friends",
+            display: props.display,
             firstName: props.firstName,
             lastName: props.lastName, 
             _id: props.id,
@@ -25,22 +25,19 @@ export default class FriendsDisplay extends Component {
         let {query} = this.state
         query = String(query).replace(" ", "").toLowerCase()
         let that = this
-        let {token} = this.state
+        let {_id} = this.state
         
         if (this.state.friends.includes(query)) {
             console.log(query)
         }
-        await fetch("http://localhost:9000/users/findUser?token="+token+ "&fullName="+query, {
+        await fetch("http://localhost:9000/users/findUser?userId="+_id+ "&fullName="+query, {
             method: "GET", 
             headers: {
                 'Content-Type': 'application/json'
             }
         }).then((res) => {
             res.json().then(data => {
-                if (data['users'].length > 0) {
-                    console.log(data['users'])
-                    that.setState({searchResults: data['users'], display: "search"})
-                }
+                that.setState({searchResults: data['users'], display: "search"})
             })
         })
     }
@@ -48,8 +45,6 @@ export default class FriendsDisplay extends Component {
     addFriend = async (event) => {
         const _id = event.target.id
         const {firstName, lastName, token} = this.state
-
-        // console.log(_id)
 
         await fetch("http://localhost:9000/users/sendRequest?_id="+_id+"&firstName="+firstName+"&lastName="+lastName+"&token="+token, {
             method: 'POST',
@@ -61,8 +56,43 @@ export default class FriendsDisplay extends Component {
                 console.log(data)
             })
         })
-
     }
+
+    removeFriend = async (event) => {
+        const removedId = event.target.id
+        const {_id} = this.state
+        let that = this
+        
+        if (window.confirm("Remove friend?")) {
+            await fetch("http://localhost:9000/friendships/remove?senderId="+_id+"&removedId="+removedId, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }).then((res) => {
+                    res.json().then(async (result) => {
+                        console.log(result)
+                        if (result['msg'] == "success") {
+                            await fetch("http://localhost:9000/friendships/getAll?id="+_id, {
+                                method: "GET",
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                }
+                            }).then((res) => {
+                                res.json().then(data => {
+                                    console.log(data)
+                                    that.setState({
+                                        friends: data['data']
+                                    })
+                                })
+                            })
+                        }
+                    })
+                })
+        // })
+        }
+    }
+    
 
     handleSubmit = (event) => {
         event.preventDefault();
@@ -75,13 +105,15 @@ export default class FriendsDisplay extends Component {
     }
 
     displayFriends = () => {
-        let {display, friends, _id} = this.state
+        let {display, friends, _id, searchResults} = this.state
+
         if (display == "friends") {
 
-            return this.state.friends.map((friend, i) => {
+            return friends.map((friend, i) => {
                 // friend = friend[0].toUpperCase() + friend.slice(1)
                 let friendship = friend['friendship']
                 let index = 0
+
                 if (friendship[index]['id'] == _id) {
                     index = 1
                 }
@@ -89,20 +121,26 @@ export default class FriendsDisplay extends Component {
                 let name = friendship[index]["firstName"] + " " + friendship[index]["lastName"]
 
                 return (
-                <div style={{borderBottom: ".2em solid black"}}><h3 style={{padding: "2em", color: "black", margin: "0"}}>{name}</h3></div>
+                <div style={content}><h3 style={{padding: "2em", color: "black", margin: "0"}}>{name}</h3><button onClick={this.removeFriend} id={friendship[index]["id"]} style={{float: "right", marginTop: "auto", marginBottom: "auto"}}>Remove</button></div>
                 )
             })
         }
         else if (display == "search") {
-            return this.state.searchResults.map((result, index) => {
-                let que = result["firstName"] + " " + result["lastName"]
-                return (
-                    <div style={content}>
-                    <h3 style={{marginTop:"auto", marginBottom: "auto"}}>{que}</h3>
-                    <button style={drop, {backgroundImage: "none"}} id={result['_id']} onClick={this.addFriend}>Add friend</button>
-                    </div>
-                )
-            })
+            if (searchResults.length > 0) {
+                return searchResults.map((result, index) => {
+                    let que = result["firstName"] + " " + result["lastName"]
+                    return (
+                        <div style={content}>
+                        <h3 style={{marginTop:"auto", marginBottom: "auto"}}>{que}</h3>
+                        <button style={drop, {backgroundImage: "none"}} id={result['_id']} onClick={this.addFriend}>Add friend</button>
+                        </div>
+                    )
+                })
+            }
+            else {
+                return <div><h3 style={{textAlign: "center", paddingTop: "2em"}}>No users found.</h3></div>
+            }
+
         }
     }
 

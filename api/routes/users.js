@@ -3,14 +3,26 @@ const { json } = require('body-parser');
 const jwt = require('jsonwebtoken');
 const fetch = require('node-fetch');
 const mailer = require('nodemailer');
-const { request } = require('../app.js');
+// const { request } = require('../app.js');
+// const multer = require('multer')
+// var multers3 = require('multer-s3')
+// var AWS = require('aws-sdk')
+
+require('dotenv').config();
 
 let User = require('../models/user.model.js');
 
+ 
 // User.createIndexes({(firstName + lastName): 1})
-
-require('dotenv').config();
 const secret = process.env.SECRET;
+
+async function checkToken(token) {
+    const user = await fetch("http://localhost:9000/checkToken?token="+token);
+    const json = await user.json();
+    const email = json['email'];
+
+    return email
+}
 
 router.route('/authenticate').post((req, res) => {
     const {email, password} = req.body;
@@ -76,73 +88,93 @@ router.route('/add').post((req, res) => {
     });
 });
 
-router.route('/addToUser').post(async (req, res) => {
-    let {query, token, type} = req.body;
-
-    const user = await fetch("http://localhost:9000/checkToken?token="+token);
-    const json = await user.json();
-    const email = json['email'];
-
-    await User.findOne({email}, async function(err, user) {
-        if (!user) {
-            res.status(401)
-                .json({
-                    error: "User doesn't exist",
-                });
-        } else if (!err) {
-
-            let values = user[type];
-            type === "stocks" ? query = query.toUpperCase() : query=query;
-
-            if (!values.includes(query) && query != "") {
-                
-                values.push(query);
-
-                let obj; 
-                if (type == "stocks") { obj = {stocks: values}; }
-                else if (type == "locations") { obj = {locations: values}; }
-                
-                await User.updateOne({email: email.toString()}, {$set:obj});
-            }
-            
-            res.status(200).json({msg: "Success"});
-        }
-    });
-});
-
-// router.route('/findUserById').get(async, (req, res) => {
-//     const {id} = req.id
-
-//     await User.findOne({id}, function(err, user) {
-//         if (!user) {
-//             res.status(404).json({error: "User not found"})
-//         }
-//         else {
-//             let result
-//         }
-//     })
-// })
-
 router.route('/findUser').get(async (req, res) => {
-    const {fullName} = req.query
+    const {fullName, userId} = req.query
 
     await User.find({fullName}, function(err, user) {
         if (user.length == 0) {
         // if (!user) {
-            res.status(404).json({error: "user not found"})
+            res.status(404).json({users: []})
         }
         else {
             let result = []
             user.forEach((data) => {
-                result.push({
-                    "firstName": data["firstName"],
-                    "lastName": data["lastName"],
-                    "_id": data["_id"]
-                })
+                if (data['_id'] != userId) {
+                    result.push({
+                        "firstName": data["firstName"],
+                        "lastName": data["lastName"],
+                        "_id": data["_id"]
+                    })
+                }
             })
             res.status(200).json({users: result})
         }
     }).limit(10)
+});
+
+router.route('/addToUser').post(async (req, res) => {
+    let {query, token, type} = req.body;
+
+    await checkToken(token).then(async (email) => {
+        await User.findOne({email}, async function(err, user) {
+            if (!user) {
+                res.status(401)
+                    .json({
+                        error: "User doesn't exist",
+                    });
+            } else if (!err) {
+    
+                let values = user[type];
+                type === "stocks" ? query = query.toUpperCase() : query=query;
+    
+                if (!values.includes(query) && query != "") {
+                    
+                    values.push(query);
+    
+                    let obj; 
+                    if (type == "stocks") { obj = {stocks: values}; }
+                    else if (type == "locations") { obj = {locations: values}; }
+                    
+                    await User.updateOne({email: email.toString()}, {$set:obj});
+                }
+                
+                res.status(200).json({msg: "Success"});
+            }
+        });
+    });
+});
+
+
+router.route('/getFromUser').get(async (req, res) => {
+    const token = req.query.token;
+    const type = req.query.type;
+
+    await checkToken(token).then(async (email) => {
+        await User.findOne({email}, function(err, user) {
+            if (!user) {
+                res.status(401)
+                    .json({
+                        error: "Incorrect email or password",
+                    });
+            } else {
+                // if (type == "friends") {
+
+                // }
+                if (type != "all") {
+                    let values = user[type];
+                    res.status(200).json({values: values});
+                } 
+                else if (type == "picture") {
+
+                }
+                else {
+                    res.status(200).json(user);
+
+                }
+            }
+        });
+    
+    });
 });
 
 router.route('/sendRequest').post(async (req, res) => {
@@ -182,36 +214,6 @@ router.route('/sendRequest').post(async (req, res) => {
     })
 })
 
-router.route('/getFromUser').get(async (req, res) => {
-    const token = req.query.token;
-    const type = req.query.type;
-
-    const user = await fetch("http://localhost:9000/checkToken?token="+token);
-    const json = await user.json();
-    const email = json['email'];
-
-    await User.findOne({email}, function(err, user) {
-        if (!user) {
-            res.status(401)
-                .json({
-                    error: "Incorrect email or password",
-                });
-        } else {
-            // if (type == "friends") {
-
-            // }
-            if (type != "all") {
-                let values = user[type];
-                res.status(200).json({values: values});
-            } 
-            else {
-                res.status(200).json(user);
-
-            }
-        }
-    });
-});
-
 router.route('/deleteRequest').post(async (req, res) => {
     const {sendId, _id, token} = req.query
 
@@ -221,5 +223,76 @@ router.route('/deleteRequest').post(async (req, res) => {
     })
     res.status(200).json({msg: "Request deleted"})
 })
+
+// router.route('/addProfilePicture').post(async (req, res) => {
+//     const {id} = req.query
+//     const {file} = req.body
+
+//     // const upload = multer({
+//     //     storage: multers3({
+//     //         s3: s3, 
+//     //         bucket: 'my-user-pictures',
+//     //         acl: 'public-read',
+//     //         metadata: function(req, file, cb) {
+//     //             cb(null, {fieldName: file.fieldName})
+//     //         },
+//     //         key: function(req, file, cb) {
+//     //             console.log(file)
+//     //             cb(null, req.id)
+//     //         }
+//     //     })
+//     // })
+//     const fileUpload = upload.single('image')
+
+//     fileUpload(async (req, res, err) => {
+//         if (err) {
+            
+//         }
+//         else {
+            
+//         }
+//     }).then(downloadUrl => {
+        
+//     })
+//     res.status(200).json({msg: "Success"})
+//     // res.status(200).json({msg: "Success"})
+
+//     // params.Key = id
+//     // var fs = require('fs')
+//     // var fileStream = fs.createReadStream(file)
+
+
+//     // fileStream.on('error', function(err) {
+//     //     res.status(401).json({msg: err})
+//     // })
+
+//     // params.Body = fileStream
+//     // if (!fileStream.error) {
+//     //     bucket.upload(params, function(err, data) {
+//     //         if (err) {
+//     //             res.status(400).json({msg: err})
+//     //             return
+//     //         } else {
+//     //             res.status(200).json({data})
+//     //             return
+//     //         }
+//     //     })
+//     // }
+// })
+
+// router.route('/getProfilePicture').get(async (req, res) => {
+//     // const {id} = req.query
+//     params.Key = "profile-default.png"
+
+//     await s3.getObject(params, function(err, data) {
+//         if (err) {
+//             res.status(400).json({msg: err})
+//         }
+//         else {
+//             res.status(200).json({data})
+//         }
+//     })
+
+// })
 
 module.exports = router;

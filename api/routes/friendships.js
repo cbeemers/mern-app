@@ -20,8 +20,10 @@ router.route('/').get( async (req, res) => {
     })
 })
 
-router.route('/add').post((req, res) => {
-    let {sender_id, added_id, added_first, added_last, sender_first, sender_last} = req.query
+router.route('/add').post(async (req, res) => {
+    let {sender_id, added_id, added_first, added_last, sender_first, sender_last} = req.query;
+    let count;
+    
     let newFriendship = new Friendship ({friendship: [
         {
             id: sender_id,
@@ -38,36 +40,52 @@ router.route('/add').post((req, res) => {
 
     newFriendship.save()
     res.status(200).json({msg: "Friend added!"})
-
     
-    
-    // if (exists['count'] == 0) {
-    //     newFriendship.save()
-    //     res.status(200).json({msg: "Friend added!"})
-    // }
-    // else {
-    //     res.status(400).json({msg: "Friendship already exists"})
-    // }
 
+
+})
+
+router.route('/remove').post(async (req, res) => {
+    let {senderId, removedId} = req.query
+    await Friendship.deleteMany( {friendship: {$all: [
+        {$elemMatch: {"id": senderId}},
+        {$elemMatch: {"id": removedId}}
+    // ]}}
+    // )
+    // await Friendship.deleteOne({$and : {friendship:[
+    //     {"id": senderId},
+    //     {"id": removedId}
+    ]}}, function(err) {
+        if (err) {
+            res.status(400).json({msg: err})
+        }
+        else {
+            res.status(200).json({msg: "success"})
+        }
+    })
 })
 
 
 router.route('/exists').get(async (req, res) => {
-    let {sender_id, added_id} = req.body
-    let count = await Friendship.find( {$and: [
-        {"id": sender_id},
-        {"id": added_id}
-    ]}).countDocuments()
+    let {senderId, addedId} = req.query
+    await Friendship.findOne( {friendship: {$all: [
+        {$elemMatch: {"id": senderId}},
+        {$elemMatch: {"id": addedId}}
+    ]}}, 
+    function(err, found) {
+        if (found) {
+            res.status(400).json({result: "found"})
+        }
+        else {
+            res.status(200).json({result: "none"})
+        }
+    })
 
-    if (count > 0) {
-        res.status(400).json({count: count})
-    } else {
-        res.status(200).json({count: count})
-    }
+
 })
 
 router.route('/getAll').get(async (req, res) => {
-    let {id, firstName, lastName} = req.query
+    let {id} = req.query
 
     await Friendship.find({ friendship: {$elemMatch: {id: id}}}, function(err, friendships) {
         if (friendships.length > 0) {
