@@ -22,7 +22,9 @@ const head = {
   minHeight: "15em",
   color: "white",
   paddingBottom: "1em",
-  backgroundColor: "#0e0650"
+  // backgroundColor: "#0e0650"
+  backgroundColor: "#192635",
+  // borderBottom: ".5em solid black"
 
 }
 

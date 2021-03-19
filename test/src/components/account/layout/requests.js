@@ -69,18 +69,18 @@ export default class RequestsDisplay extends Component {
                             headers: {
                                 'Content-Type': 'application/json',
                             }
-                        }).then((res) => {
-                            res.json().then(data => {
-                                console.log(data)
-                            })
                         })
+                        // .then((res) => {
+                        //     res.json().then(data => {
+                        //         console.log(data)
+                        //     })
+                        // })
                     }
                 })
             })
         }
 
         this.removeRequest(_id)
-
     }
 
     removeRequest = async (id) => {

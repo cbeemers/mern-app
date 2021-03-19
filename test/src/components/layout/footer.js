@@ -19,5 +19,7 @@ const footer = {
     // bottom: "0",
     // position: "absolute",
 
-    backgroundColor: "#0e0650",
+    // backgroundColor: "#0e0650",
+    backgroundColor: "#192635",
+    borderTop: ".5em solid black"
 }

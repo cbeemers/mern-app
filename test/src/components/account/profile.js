@@ -155,7 +155,7 @@ export default class Profile extends Component {
                 <Header title={"Profile"} />
                 
                 <div className="main" style={{minHeight: "100vh"}}>
-                <aside className="aside1">
+                <aside className="aside1" style={{borderTop: "1em solid black", borderBottom: "1em solid black"}}>
                     <div style={{textAlign: "center", marginTop: "4em"}}>
                         <div onClick={this.changePicture}><p style={{margin: "0"}}><img className="profile-picture" src="./img/profile-default.png" /></p></div>
                         {/* <div onClick={this.changePicture}><input type='file' id='file' ref={(ref) => inputFile = ref} style={{margin: "0"}}><img className="profile-picture" src="./img/profile-default.png" /></input></div> */}

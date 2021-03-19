@@ -289,8 +289,10 @@ export default class Stock extends Component {
     render() {
         let {message, stockWidget, calendarWidget, graphButton, graphButtons, graph, addFavorite, favorites} = this.state;
         return (
-            <div style={account}>
-                <Header title={"Stocks"} />
+            <div style={{minHeight: "-webkit-calc(100%)", backgroundColor: "#192635",}}>
+            <Header title={"Stocks"} />
+            <div style={account,{border: ".5em solid black", minHeight: "100vh"}}>
+                
             
             
             <div style={msg}>
@@ -314,6 +316,8 @@ export default class Stock extends Component {
             </div>
 
             </div>
+            </div>
+
             </div>
         );
     }

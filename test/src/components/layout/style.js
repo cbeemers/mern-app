@@ -1,7 +1,9 @@
 
 const account = {
-    minHeight: "-webkit-calc(100%)",
-    backgroundColor: "#192635"
+    // minHeight: "-webkit-calc(100%)",
+    minHeight: "100vh",
+    backgroundColor: "#192635",
+    // backgroundColor: "#0e0650",
 }
 
 const border = {

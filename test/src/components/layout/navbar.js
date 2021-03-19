@@ -75,7 +75,8 @@ class Navbar extends React.Component {
 }
 
 const color = {
-    backgroundColor: "#0e0650",
+    // backgroundColor: "#0e0650",
+    backgroundColor: "#192635"
     // textAlign: "center"
 }
 
