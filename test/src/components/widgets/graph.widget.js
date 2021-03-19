@@ -18,7 +18,7 @@ export default class StockGraph extends Component {
                      31, 30, 31, 30, 31, 31, 30, 31, 30, 31];   
 
         let today = new Date()
-
+        let day = today.getDate()
         this.months = [
             "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"
           ];
@@ -60,10 +60,10 @@ export default class StockGraph extends Component {
                 start = props.json["Time Series (Daily)"][props.year+"-01-0"+d];
             }
             
-            while (month <= today.getMonth()) {
+            while (month <= today.getMonth()+1) {
                 if (month<10) { month = "0" + month; }
                 while (d<=this.days[month-1]) {
-                
+                    
                     if (start != undefined) {
                         count++;
                         volume+= parseFloat(start["5. volume"]);
