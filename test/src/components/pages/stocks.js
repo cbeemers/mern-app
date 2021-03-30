@@ -123,7 +123,7 @@ export default class Stock extends Component {
             query: query,
             stockWidget: <StockWidget open={open} 
             close={close} high={high}
-            low={low} volume={volume} date={date}
+            low={low} volume={volume} date={date} stock={query}
             />,
             calendarWidget: null,
             json: json,
@@ -134,19 +134,25 @@ export default class Stock extends Component {
         });
     }
 
-    graph = async(type) => {
+    graph = async(event) => {
         const {graph} = this.state
+        let type = event.target.id
+
         if (graph != null) {
+            // console.log(type)
             this.setState({
                 graph: null
             });
+            
         }
+
         const {year, date, month, json, query, day} = this.state;
-        
-        this.setState({
+        // console.log(type)
+        await this.setState({
             graph: <StockGraph year={year} json={json} stock={query} type={type} day={day} month={month} />,
         });
-        this.drop();
+        // console.log(this.state.graph)
+        // this.drop();
     }
 
     addFavorite = async() => {
@@ -184,8 +190,8 @@ export default class Stock extends Component {
 
         this.setState({
             graphButtons: <div className="buttons">
-                <button style={{marginRight: "1em"}} onClick={this.graph.bind(this,"monthly")} id="monthly">Monthly</button>
-                <button onClick={this.graph.bind(this,"year")} id="year">This year</button>
+                <button style={{marginRight: "1em"}} onClick={this.graph} id="monthly">Monthly</button>
+                <button onClick={this.graph} id="year">This year</button>
             </div>,
         });
     
@@ -268,13 +274,13 @@ export default class Stock extends Component {
     }
 
     favoriteClick = async (id) => {
-        console.log(id);
-        this.setState({query: id, json: null});
+        await this.setState({query: id.toLowerCase(), json: null});
         await this.search();
     }
 
     render() {
         let {message, stockWidget, calendarWidget, graphButton, graphButtons, graph, addFavorite, favorites} = this.state;
+        // console.log(graph)
         return (
             <div style={{minHeight: "-webkit-calc(100%)", backgroundColor: "#192635",}}>
             <Header title={"Stocks"} />

@@ -13,14 +13,16 @@ export default class StockWidget extends Component {
             open: props.open,
             close: props.close,
             volume: props.volume, 
-            date: props.date
+            date: props.date,
+            stock: props.stock,
         }
     }
 
     render() {
-        const {high, low, open, close, volume, date} = this.state;
+        const {high, low, open, close, volume, date, stock} = this.state;
         return (
             <div style={stockWidget}>
+                <h1 style={{color: "white"}}>{stock.toUpperCase()}</h1>
                 <h1 style={{color: "white"}}>{date}</h1>
             <div>
             <table className="stockWidg">

@@ -12,6 +12,7 @@ const multer = require('multer')
 require('dotenv').config();
 
 let User = require('../models/user.model.js');
+let Friendship = require('../models/friendship.model')
 
 const secret = process.env.SECRET;
 
@@ -250,17 +251,71 @@ router.route('/addById').post(async (req, res) => {
     })
 })
 
-let upload = require('../storage/upload')
+let upload = require('../storage/upload');
+const friendshipModel = require('../models/friendship.model.js');
 router.route('/addProfilePicture').post(upload.any(), async function(req, res) {
     const {_id} = req.query
     console.log(req.body)
     const uri = req.files[0].location
-    
-    await User.updateOne({_id}, {$set: {profilePicture: uri}}, function (err, user) {
-        if (!err) {
-            res.status(200).json({picture: uri})
+
+    await fetch("http://localhost:9000/users/update?type=picture&_id="+_id, {
+        method: "POST",
+        body: JSON.stringify({
+            profilePicture: uri
+        }),
+        headers: {
+            'Content-Type': 'application/json'
         }
+    }).then(response => {
+        response.json().then(data => {
+            if (data["picture"]) {
+                res.status(200).json({picture: data['picture']})
+            }
+        })
     })
+    
+    // await User.updateOne({_id}, {$set: {profilePicture: uri}}, function (err, user) {
+    //     if (!err) {
+    //         res.status(200).json({picture: uri})
+    //     }
+    // })
+
+
+})
+
+router.route('/update').post(async (req, res) => {
+    let {type, _id} = req.query
+    let {firstName, lastName, password, profilePicture} = req.body
+
+    console.log(req.body)
+
+    let newObject = {}
+
+    if (type === "password") {}
+    
+    else if (type === "name" || type === "picture") {
+        if (firstName) {newObject = {firstName}}
+        else if (lastName) {newObject = {lastName}}
+        else if (profilePicture) {newObject = {profilePicture}}
+
+        await User.updateOne({_id}, {$set: newObject}, async function (err, user) {
+            if (err) {
+                res.status(500).json({msg: "server error, user not updated"})
+            } 
+            else {
+
+                await Friendship.updateMany( {friendship: {$elemMatch: {id: _id}}}, {$set: {"friendship.$[elem].profilePicture":profilePicture}},
+                {arrayFilters: [ { "elem.id": _id } ]}, 
+                    function(err, friendship) {
+                        if (!err) {
+                            res.status(200).json({picture: profilePicture})
+                        }
+                    })
+                
+            }
+        })
+
+    }
 
 
 })

@@ -116,4 +116,12 @@ router.route('/getAll').get(async (req, res) => {
     }) 
 })
 
+router.route('/update').post(async (req, res) => {
+    let {id} = req.query
+    let {firstName, lastName, profilePicture} = req.body
+
+    
+
+})
+
 module.exports = router
