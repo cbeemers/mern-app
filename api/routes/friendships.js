@@ -5,6 +5,7 @@ const fetch = require('node-fetch');
 const mailer = require('nodemailer')
 
 let Friendship = require('../models/friendship.model.js');
+// let User = require('../models/user.model');
 
 require('dotenv').config();
 const secret = process.env.SECRET;
@@ -17,30 +18,49 @@ router.route('/').get( async (req, res) => {
         else {
             res.status(200).json({friendship: friendship})
         }
+    });
+});
+
+async function getProfilePicture(id) {
+    let picture
+    await fetch("http://localhost:9000/users/getUser?_id="+id).then(async (res) => {
+        await res.json().then(data => {
+            picture = data['profilePicture']
+        })
     })
-})
+
+    return picture;
+}
 
 router.route('/add').post(async (req, res) => {
     let {sender_id, added_id, added_first, added_last, sender_first, sender_last} = req.query;
-    let count;
-    
-    let newFriendship = new Friendship ({friendship: [
-        {
-            id: sender_id,
-            firstName: sender_first,
-            lastName: sender_last
-        },
-        {
-            id: added_id,
-            firstName: added_first,
-            lastName: added_last
-        }
-    
-    ]})
+    let {userPicture} = req.body
 
-    newFriendship.save()
-    res.status(200).json({msg: "Friend added!"})
+    await getProfilePicture(added_id).then(async (addingPicture) => {
+        if (addingPicture) {
+            let newFriendship = new Friendship ({friendship: [
+                {
+                    id: sender_id,
+                    firstName: sender_first,
+                    lastName: sender_last,
+                    profilePicture: userPicture
+                },
+                {
+                    id: added_id,
+                    firstName: added_first,
+                    lastName: added_last,
+                    profilePicture: addingPicture
+                }
+            
+            ]})
+            
+            await newFriendship.save()
+            res.status(200).json({msg: "Friend added!"})
+        }
+
+    })
     
+
 
 
 })

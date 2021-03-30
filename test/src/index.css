@@ -72,6 +72,15 @@ aside {
 
 .profile-picture {
   border-radius: 50%;
+  width: 14em;
+  height: 14em;
+}
+
+.profile-picture-else {
+  border-radius: 50%;
+  width: 10em;
+  height: 10em;
+  /* padding-right: 1em; */
 }
 
 

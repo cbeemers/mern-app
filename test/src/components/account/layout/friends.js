@@ -23,13 +23,14 @@ export default class FriendsDisplay extends Component {
 
     search = async () => {
         let {query} = this.state
-        query = String(query).replace(" ", "").toLowerCase()
+        query = String(query).replace(/ /g, "").toLowerCase()
         let that = this
         let {_id} = this.state
         
         if (this.state.friends.includes(query)) {
             console.log(query)
         }
+        console.log(query)
         await fetch("http://localhost:9000/users/findUser?userId="+_id+ "&fullName="+query, {
             method: "GET", 
             headers: {
@@ -122,7 +123,12 @@ export default class FriendsDisplay extends Component {
                 let name = friendship[index]["firstName"] + " " + friendship[index]["lastName"]
 
                 return (
-                <div style={content}><h3 style={{padding: "2em", color: "black", margin: "0"}}>{name}</h3><button onClick={this.removeFriend} id={friendship[index]["id"]} style={{float: "right", marginTop: "auto", marginBottom: "auto"}}>Remove</button></div>
+                <div style={content}>
+                    <div style={{display:"flex"}}>
+                    <img className="profile-picture-else" src={friendship[index]["profilePicture"]} />
+                    <h3 style={{ color: "black", margin: "auto 0" , padding: "1em"}}>{name}</h3></div>
+                    <button onClick={this.removeFriend} id={friendship[index]["id"]} style={{float: "right", marginTop: "auto", marginBottom: "auto"}}>Remove</button>
+                </div>
                 )
             })
         }
@@ -132,8 +138,11 @@ export default class FriendsDisplay extends Component {
                     let que = result["firstName"] + " " + result["lastName"]
                     return (
                         <div style={content}>
-                        <h3 style={{marginTop:"auto", marginBottom: "auto"}}>{que}</h3>
-                        <button style={drop, {backgroundImage: "none"}} id={result['_id']} onClick={this.addFriend}>Add friend</button>
+                        <div style={{display: "flex"}}>
+                        <img className="profile-picture-else" src={result['profilePicture']}/>
+                        <h3 style={{padding: "1em", marginTop:"auto", marginBottom: "auto"}}>{que}</h3>
+                        </div>
+                        <button style={drop, {backgroundImage: "none", margin: "auto 0"}} id={result['_id']} onClick={this.addFriend}>Add friend</button>
                         </div>
                     )
                 })
@@ -155,7 +164,7 @@ export default class FriendsDisplay extends Component {
                 <input style={{width: "20em"}} id="search" placeholder="Friend" onChange={this.handleChange} /><input text="search" className="submit"  type="submit" />
             </form>
             </div>
-            <div>
+            <div style={{color: "black"}}>
             {this.displayFriends()}
             </div>
             </div>
@@ -177,7 +186,7 @@ tempSearch.borderBottom = ".5em solid black"
 let drop = {
     width: "5em",
     float:"right", 
-    height: "3.4em", 
+    height: "1em", 
     marginTop:"auto", 
     borderRadius: ".5em",
     marginBottom: "auto", 

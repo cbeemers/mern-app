@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import { withRouter } from 'react-router';
 import {getCookie} from '../../cookie';
 import Header from '../../layout/Header'
 
@@ -15,17 +16,20 @@ export default class RequestsDisplay extends Component {
             userFirst: props.userFirst,
             userLast: props.userLast,
             userId: props.userId,
+            userPicture: props.userPicture,
         }
     }
 
     display = () => {
-
+        console.log(this.state.userPicture)
         if (this.state.requests.length > 0) {
             return this.state.requests.map((result, index) => {
-                let que = result["firstName"] + " " + result["lastName"]
+                let fullName = result["firstName"] + " " + result["lastName"]
+                let que = result["firstName"] + "-" + result["lastName"] + "-" + result['profilePicture']
                 return (
                     <div style={content}>
-                    <h3 style={{marginTop:"auto", marginBottom: "auto"}}>{que}</h3>
+                    <img className="profile-picture-else" src={result['profilePicture']} />
+                    <h3 style={{marginTop:"auto", marginBottom: "auto"}}>{fullName}</h3>
                     <div style={cluster}>
                     <button style={drop, {backgroundImage: "none"}} name="accept" value={que} id={result['_id']} onClick={this.respond}>Accept</button>
                     <button style={drop, {backgroundImage: "none"}} name="decline" value={que} id={result['_id']} onClick={this.respond}>Decline</button>
@@ -42,22 +46,26 @@ export default class RequestsDisplay extends Component {
     }
 
     respond = async (event) => {
+        let {userPicture} = this.state
+
         let _id = event.target.id
-        let name = event.target.value
-        let split = name.split(" ")
+        let split = event.target.value.split('-')
         let first = split[0]
         let last = split[1]
+
         let {userId, userFirst, userLast} = this.state
         let action = event.target.name
-        
+        console.log(first, last)
         // await fetch("h")
-    
+        console.log(userPicture)
+
         if (action == "accept") {
             await fetch("http://localhost:9000/friendships/exists?senderId="+userId+"&addedId="+_id, {
                 method: "GET", 
                 headers: {
                     'Content-Type': 'application/json'
-                }
+                },
+
             }).then(res => {
                 res.json().then(async data => {
                     if (data['result'] != "found") {
@@ -66,7 +74,8 @@ export default class RequestsDisplay extends Component {
                             method: "POST",
                             headers: {
                                 'Content-Type': 'application/json',
-                            }
+                            },
+                            body: JSON.stringify({userPicture})
                         })
                         // .then((res) => {
                         //     res.json().then(data => {
@@ -120,7 +129,7 @@ export default class RequestsDisplay extends Component {
 let content = {
     display: "flex",
     justifyContent: "space-between",
-    
+    color: "black",
     // color: "red", 
     padding: "1em",
     borderBottom: ".5em solid black"

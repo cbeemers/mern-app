@@ -8,6 +8,7 @@ import Login from '../account/login'
 import Weather from '../pages/weather'
 import Stock from '../pages/stocks'
 import Signup from '../account/signup'
+import { profileContent } from '../layout/style';
 
 // import background from '/background.php';
 
@@ -23,6 +24,7 @@ export default class Home extends Component{
             token: getCookie('token'),
             userLast: "",
             userId: "",
+            profilePicture: ""
         }
 
         this.signup = this.signup.bind(this)
@@ -41,11 +43,11 @@ export default class Home extends Component{
                 if (res.status === 200) {
                     
                     res.json().then(data => {
-                        // console.log(data);
+                        console.log(data);
                         user = String(data['firstName'])[0].toUpperCase() + String(data['firstName']).slice(1);
                         let userLast = String(data['lastName'])
                         let userId = String(data['_id'])
-                        that.setState({user:user, display: <Welcome user={user} />, userLast: userLast, userId: userId});
+                        that.setState({user:user, display: <Welcome user={user} />, userLast: userLast, userId: userId, profilePicture: data['profilePicture']});
                         // that.setState({user:user, display: <Counter count={111}/>, userLast: userLast, userId: userId});
                     })
         
@@ -68,7 +70,7 @@ export default class Home extends Component{
     }
 
     displayRequests = async () => {
-        let {token, userLast, userId, user} = this.state;
+        let {token, userLast, userId, user, profilePicture} = this.state;
         let that = this
 
         await fetch("http://localhost:9000/users/getFromUser?type=requests&token="+token, {
@@ -79,7 +81,7 @@ export default class Home extends Component{
         }).then((res) => {
             res.json().then(data => {
                 that.setState({
-                    display: <RequestsDisplay token={token} requests={data['values']} userLast={userLast} userId={userId} userFirst={user}/>
+                    display: <RequestsDisplay userPicture={profilePicture} token={token} requests={data['values']} userLast={userLast} userId={userId} userFirst={user}/>
                 })
             })
         })
@@ -107,6 +109,26 @@ export default class Home extends Component{
         }
     }
 
+    displayStocks = async () => {
+
+        let {token} = this.state;
+        let type = "stocks";
+        let that = this;
+
+        if (token != "") {
+            await fetch("http://localhost:9000/users/getFromUser?type="+type+"&token="+token, {
+                method: "GET",
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            }).then((res) => {
+                res.json().then((data) => {
+                    that.setState({display: <Stock favorites={data['values']} />});
+                });
+            });
+        }
+    }
+
     signup = (event) => {
         event.preventDefault()
         this.setState({display: <Signup />})
@@ -131,7 +153,7 @@ export default class Home extends Component{
                 <aside className="aside2" >
                     <div style={aside2}>
                         <div className="home-button" onClick={() => {this.setState({display:<Weather />})}}><h3>Weather</h3></div>
-                        <div className="home-button" onClick={() => {this.setState({display:<Stock />})}}><h3>Stocks</h3></div>
+                        <div className="home-button" onClick={this.displayStocks}><h3>Stocks</h3></div>
                         <div className="home-button"><h3>main</h3></div>
                         
                     </div>

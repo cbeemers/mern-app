@@ -123,7 +123,9 @@ export default class Profile extends Component {
                 method: "POST",
                 body: fileData
             }).then((res) => {
-                res.json(data => {
+                
+                res.json().then(data => {
+                    console.log(data)
                     that.setState({profilePicture: data['picture']})
                 })
                 // console.log(res)
@@ -153,12 +155,6 @@ export default class Profile extends Component {
                 <aside className="aside1" style={{borderTop: "1em solid black", borderBottom: "1em solid black", maxWidth: "25em"}}>
                     <div style={{textAlign: "center", marginTop: "4em"}}>
                         <div onClick={this.changePicture}><p style={{margin: "0"}}><img className="profile-picture" src={profilePicture} /></p></div>
-                        {/* <form id="picture" name="profile">
-                            <div>
-                            <p style={{margin: "0"}}><img className="profile-picture" src={profilePicture} /><input></input></p>
-                            </div>
-                        </form> */}
-                        {/* <div onClick={this.changePicture}><input type='file' id='file' ref={(ref) => inputFile = ref} style={{margin: "0"}}><img className="profile-picture" src="./img/profile-default.png" /></input></div> */}
                         <br></br>
                         <h2>{name}</h2>
                         <p>on click, allow for change of profile picture</p>

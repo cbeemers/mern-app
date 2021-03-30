@@ -65,7 +65,7 @@ router.route('/authenticate').post((req, res) => {
 
 router.route('/add').post((req, res) => {
     const {email, password, firstName, lastName} = req.body;
-    let fullName = String(firstName).toLowerCase() + String(lastName).toLowerCase()
+    let fullName = (String(firstName) + String(lastName)).replace(/ /g, "").toLowerCase()
     const newUser = new User({email, password, firstName, lastName, fullName});
     
     User.find({ email }, (err, previous) => {
@@ -147,7 +147,18 @@ router.route('/addToUser').post(async (req, res) => {
     });
 });
 
+router.route('/getUser').get(async (req, res) => {
+    const {_id} = req.query
 
+    User.findOne({_id}, function(err, user) {
+        if (user) {
+            res.status(200).json({firstName: user['firstName'], lastName: user['lastName'], profilePicture: user['profilePicture']})
+        }
+    })
+})
+
+// Gets information pertaining to current user. 
+// Not for getting information on others
 router.route('/getFromUser').get(async (req, res) => {
     const token = req.query.token;
     const type = req.query.type;
@@ -160,9 +171,7 @@ router.route('/getFromUser').get(async (req, res) => {
                         error: "Incorrect email or password",
                     });
             } else {
-                // if (type == "friends") {
-
-                // }
+                
                 if (type != "all") {
                     let values = user[type];
                     res.status(200).json({values: values});
@@ -200,6 +209,7 @@ router.route('/sendRequest').post(async (req, res) => {
                     _id: sender_id,
                     firstName: senderFirst,
                     lastName: senderLast,
+                    profilePicture: json['profilePicture']
                 })
                 //     {
                 //     firstName: firstName, 
@@ -239,8 +249,7 @@ router.route('/addById').post(async (req, res) => {
         }
     })
 })
-// let multer = require('multer')
-// let upload = multer({ dest: 'my-user-pictures' });
+
 let upload = require('../storage/upload')
 router.route('/addProfilePicture').post(upload.any(), async function(req, res) {
     const {_id} = req.query

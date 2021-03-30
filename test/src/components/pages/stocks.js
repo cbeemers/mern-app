@@ -40,6 +40,12 @@ export default class Stock extends Component {
             <CalendarWidget year={year} date={month + " " + day + " " + year} changeDate={this.changeDate} pagination={pagination} />
         );
 
+        let favorites = []
+        // console.log(props.favorites)
+        if (props.favorites !== undefined) {
+            favorites = props.favorites
+        }
+
         this.state = {
             message: "",
             query: "",
@@ -55,13 +61,13 @@ export default class Stock extends Component {
             graphButtons: null,
             graph: null,
             addFavorite: null,
-            favorites: [],
+            favorites: favorites,
             token: getCookie('token'),
         }
         
-        if (this.state.token != "") {
-            this.getFavorites();
-        }
+        // if (this.state.token != "") {
+        //     this.getFavorites();
+        // }
     }
 
     setMonth = async (id) => {
@@ -131,13 +137,13 @@ export default class Stock extends Component {
     graph = async(type) => {
         const {graph} = this.state
         if (graph != null) {
-            await this.setState({
+            this.setState({
                 graph: null
             });
         }
         const {year, date, month, json, query, day} = this.state;
         
-         await this.setState({
+        this.setState({
             graph: <StockGraph year={year} json={json} stock={query} type={type} day={day} month={month} />,
         });
         this.drop();
@@ -163,27 +169,8 @@ export default class Stock extends Component {
             console.log(res.json());
         });
 
-        await this.getFavorites();
+        // await this.getFavorites();
         await this.createDropdown();
-    }
-
-    getFavorites = async() => {
-        let {token} = this.state;
-        let type = "stocks";
-        let that = this;
-
-        if (token != "") {
-            await fetch("http://localhost:9000/users/getFromUser?type="+type+"&token="+token, {
-                method: "GET",
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            }).then((res) => {
-                res.json().then((data) => {
-                    that.setState({favorites: data['values']});
-                });
-            });
-        }
     }
 
     drop = () => {
@@ -282,7 +269,7 @@ export default class Stock extends Component {
 
     favoriteClick = async (id) => {
         console.log(id);
-        await this.setState({query: id, json: null});
+        this.setState({query: id, json: null});
         await this.search();
     }
 
