@@ -6,10 +6,17 @@ var logger = require('morgan');
 var cors = require("cors");
 var mongoose = require("mongoose");
 const jwt = require('jsonwebtoken');
-const multer = require('multer')
-var AWS = require('aws-sdk')
+var upload = require('./storage/upload')
+// const multer = require('multer');
+// const multerS3 = require('multer-s3')
+// // var upload = multer();
 
+require('dotenv').config();
+const secret = process.env.SECRET;
 
+// var AWS = require('aws-sdk')
+// let config = JSON.parse(process.env.config)
+// const s3 = new AWS.S3(config)
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -19,8 +26,7 @@ var stockRouter = require('./routes/stock');
 var friendshipRouter = require('./routes/friendships');
 // var withAuth = require('./routes/middleware')
 
-require('dotenv').config();
-const secret = process.env.SECRET;
+
 
 var app = express();
 const uri = process.env.ATLAS_URI;
@@ -36,35 +42,10 @@ connection.once('open', () => {
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');  
-
-// app.use(function(req, res, next) {
-//   res.header("Access-Control-Allow-Origin", "*");
-//   res.header(
-//     "Access-Control-Allow-Headers",
-//     "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-//   );
-//   next();
-// });
-
-// app.use(function(req, res, next) {
-//   res.header('Access-Control-Allow-Credentials', true);
-//   res.header('Access-Control-Allow-Origin', "*");
-//   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,UPDATE,OPTIONS');
-//   res.header('Access-Control-Allow-Headers', 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept Set-Cookie');
-//   next();
-// });
-
-// var handleCors = function(req, res, next) {
-//   res.set("Access-Control-Allow-Origin", "*");
-//   res.set("Access-Control-Allow-Credentials", 'true');
-//   // res.set("")
-//   // res.status(204).end();
-//   next();
-// }
 app.use(cookieparser());
 app.use(cors(
   {
-//     AccessControlAllowOrigin: "*",
+    AccessControlAllowOrigin: "http://localhost:3000",
     // preflightContinue: true,
     origin: "*",
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
@@ -76,7 +57,8 @@ app.use(cors(
   ));
 app.use(logger('dev'));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+// app.use(upload.array());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
@@ -97,6 +79,9 @@ app.get('/checkToken', (req, res) => {
 
 });
 
+
+
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
@@ -112,5 +97,7 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+
 
 module.exports = app;

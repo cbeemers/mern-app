@@ -4,7 +4,10 @@ import {getCookie} from '../cookie';
 import Welcome from './welcome'
 import FriendsDisplay from '../account/layout/friends'
 import RequestsDisplay from '../account/layout/requests'
-import { Link, withRouter } from 'react-router-dom';
+import Login from '../account/login'
+import Weather from '../pages/weather'
+import Stock from '../pages/stocks'
+import Signup from '../account/signup'
 
 // import background from '/background.php';
 
@@ -21,6 +24,8 @@ export default class Home extends Component{
             userLast: "",
             userId: "",
         }
+
+        this.signup = this.signup.bind(this)
     }
 
     componentDidMount() {
@@ -41,10 +46,14 @@ export default class Home extends Component{
                         let userLast = String(data['lastName'])
                         let userId = String(data['_id'])
                         that.setState({user:user, display: <Welcome user={user} />, userLast: userLast, userId: userId});
+                        // that.setState({user:user, display: <Counter count={111}/>, userLast: userLast, userId: userId});
                     })
         
                 }
             });
+        }
+        else {
+            this.setState({display: <Login signup={this.signup}/>})
         }
     }
 
@@ -98,12 +107,17 @@ export default class Home extends Component{
         }
     }
 
+    signup = (event) => {
+        event.preventDefault()
+        this.setState({display: <Signup />})
+    }
+
     display = () => {
         let {user, display} = this.state
-        if (user != "") {
+        // if (user != "") {
             return (
             <div className="main" style={{minHeight: "-webkit-calc(100%)"}}>
-                <aside className="welcome-aside" style={{backgroundColor: "#192635", }}>
+                <aside className="welcome-aside">
                     <div style={{padding: "1em"}}>
                         <div className="home-button" onClick={this.displayRequests}><h3>Requests</h3></div>
                         <div className="home-button" onClick={this.displayMessages}><h3>Messages</h3></div>
@@ -112,14 +126,24 @@ export default class Home extends Component{
                     </div>
 
                 </aside>
-                {display}
+                <div className="main-content">{display}</div>
+                
+                <aside className="aside2" >
+                    <div style={aside2}>
+                        <div className="home-button" onClick={() => {this.setState({display:<Weather />})}}><h3>Weather</h3></div>
+                        <div className="home-button" onClick={() => {this.setState({display:<Stock />})}}><h3>Stocks</h3></div>
+                        <div className="home-button"><h3>main</h3></div>
+                        
+                    </div>
+                    
+                </aside>
             </div>
             )
-        }
-        else {
-            return display
+        // }
+        // else {
+        //     return display
             
-        }
+        // }
     }
 
     render() {
@@ -130,6 +154,11 @@ export default class Home extends Component{
 }
 
 let background = './img/background4.jpg';
+
+const main = {
+    // borderLeft: ".1em solid #A7C7E7",
+    // borderRight: ".1em solid #A7C7E7"
+}
 
 const welcome = {
     height: "-webkit-calc(100%)",
@@ -146,4 +175,8 @@ const content = {
     position: "relative",
     left: "50%",
     transform: "translate(-50%, -50%)"
+}
+
+const aside2 = {
+    padding: "1em"
 }

@@ -5,7 +5,7 @@ import {getCookie} from '../cookie';
 import Header from '../layout/Header';
 import {account, profileContent} from '../layout/style';
 
-const axios = require('axios')
+// import ReactFileReader from 'react-file-reader'
 
 export default class Profile extends Component {
     constructor(props) {
@@ -25,26 +25,16 @@ export default class Profile extends Component {
             fileSelector: document.createElement('input'),
             token: getCookie('token'),
             _id: "",
+            profilePicture: "",
 
         }
     }
 
-    // test = async () => {
-    //     await fetch("http://localhost:9000/users/getProfilePicture", {
-    //         method: "GET",
-    //         headers: {
-    //             'Content-Type': 'application/json',
-    //         }
-    //     }).then((res) => {
-    //         res.json().then((data) => {
-    //             console.log(data)
-    //         })
-    //     })
-    // }
-
     componentDidMount() {
+
         let {fileSelector} = this.state
         fileSelector.setAttribute('id', 'fileInput')
+        fileSelector.setAttribute('name', "profile") 
         fileSelector.setAttribute('type', 'file')
         fileSelector.setAttribute('multiple', 'multiple')
         fileSelector.setAttribute('accept', ['.jpg', '.png', '.jpeg'])
@@ -74,11 +64,11 @@ export default class Profile extends Component {
                         joined: data['createdAt'],
                         friends: data['friends'],
                         name: firstName  + " " + lastName,
-                        _id: data['_id']
+                        _id: data['_id'],
+                        profilePicture: data['profilePicture']
                     });
                 });
             });
-            // console.log(this.state.stocks)
         }
         
     }
@@ -115,22 +105,28 @@ export default class Profile extends Component {
         let {fileSelector, _id} = this.state
         event.preventDefault()
 
-        // console.log(true)
         fileSelector.click()
-        // console.log(fileSelector.value)
 
         let that = this
         
-
         fileSelector.onchange = async function () {
-            let file = this.files[0]
+            let fileObject = this.files[0]
             console.log(_id)
             
-            let data = new FormData()
-            data.append('image', file, _id)
+            let fileData = new FormData();
             
-            axios.post('http://localhost:9000/users/addProfilePicture', {data, _id}).then(() => {
+            fileData.append('title', _id);
+            fileData.append('image', fileObject, fileObject.name);
+            fileData.enctype = "multipart/form-data"
 
+            await fetch('http://localhost:9000/users/addProfilePicture?_id=' + _id, {
+                method: "POST",
+                body: fileData
+            }).then((res) => {
+                res.json(data => {
+                    that.setState({profilePicture: data['picture']})
+                })
+                // console.log(res)
             })
 
             // })
@@ -145,19 +141,23 @@ export default class Profile extends Component {
 
 
     render() {
-        let {user, joined, displayS, displayC, name, fileSelector} = this.state;
+        let {user, joined, displayS, displayC, name, fileSelector, profilePicture} = this.state;
         let date = new Date(joined)
+        
         joined = (date.getMonth()+1) + "/" + date.getDate() + "/" + date.getFullYear()
-        // console.log(fileSelector.files)
+
 
         return (
-            <div style={account}>
-                <Header title={"Profile"} />
-                
+            <div style={account}>           
                 <div className="main" style={{minHeight: "100vh"}}>
-                <aside className="aside1" style={{borderTop: "1em solid black", borderBottom: "1em solid black"}}>
+                <aside className="aside1" style={{borderTop: "1em solid black", borderBottom: "1em solid black", maxWidth: "25em"}}>
                     <div style={{textAlign: "center", marginTop: "4em"}}>
-                        <div onClick={this.changePicture}><p style={{margin: "0"}}><img className="profile-picture" src="./img/profile-default.png" /></p></div>
+                        <div onClick={this.changePicture}><p style={{margin: "0"}}><img className="profile-picture" src={profilePicture} /></p></div>
+                        {/* <form id="picture" name="profile">
+                            <div>
+                            <p style={{margin: "0"}}><img className="profile-picture" src={profilePicture} /><input></input></p>
+                            </div>
+                        </form> */}
                         {/* <div onClick={this.changePicture}><input type='file' id='file' ref={(ref) => inputFile = ref} style={{margin: "0"}}><img className="profile-picture" src="./img/profile-default.png" /></input></div> */}
                         <br></br>
                         <h2>{name}</h2>
@@ -166,7 +166,7 @@ export default class Profile extends Component {
                     <div style={{textAlign: "center", marginTop: "2em"}}>Date Joined: {joined}</div>
 
                 </aside>
-                <div className="main-content" style={{padding: "2em", backgroundColor:"white", border: "1em black", borderStyle: "solid", color:"black"}}>
+                <div className="main-content" style={{padding: "2em 0", backgroundColor:"white", border: "1em black", borderStyle: "solid", color:"black"}}>
 
                 <div className="over"><Link to="/profile/friends" className="friends-link"><h1 style={link}>Friends</h1></Link></div>
 
@@ -182,8 +182,7 @@ export default class Profile extends Component {
                     </div>
                     {displayC}
 
-                    <div><h1>Change Password</h1></div>
-                    <div><h1>Change Profile Picture</h1></div>
+                    <div style={content}><h1>Change Password</h1></div>
                     
 
                 </div>
@@ -211,6 +210,7 @@ let content = {
     borderBottom: ".25em black", 
     borderBottomStyle: "solid", 
     justifyContent: "space-between",
+    padding: "1em", 
     
     // color: "red", 
     // padding: "1em"
@@ -229,7 +229,7 @@ let drop = {
 }
 
 let displayed = {
-    padding: ".5em 0", 
+    padding: ".5em", 
     borderBottom: ".1em black", 
     borderBottomStyle:"solid", 
     color: "black"

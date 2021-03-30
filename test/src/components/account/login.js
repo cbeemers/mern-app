@@ -14,6 +14,7 @@ class Login extends React.Component {
             password: "", 
             data: null,
         }
+        this.signup = this.props.signup.bind(this);
     }
 
     typeUsername = (event) => {
@@ -46,7 +47,7 @@ class Login extends React.Component {
                 res.json().then(data => {
     
                     document.cookie = 'token' + "=" + "bearer " + data['token'];
-                    that.props.history.push('/');
+                    // that.props.history.push('/');
                     window.location.reload()
 
                 });
@@ -77,7 +78,7 @@ class Login extends React.Component {
                 <input onChange={this.typePassword} type="password" className="form-control" name="password" id="password" />
                 </div>
                 <button type="submit" className="btn btn-primary">Login</button>
-                <p style={{paddingTop: "1em"}}>Don't have an account? <a href="/signup">Signup</a></p>
+                <p style={{paddingTop: "1em"}}>Don't have an account? <a onClick={this.signup} href="">Signup</a></p>
             </form>
             </div>
             
@@ -88,7 +89,7 @@ class Login extends React.Component {
 
 let account2 = {
     minHeight: "-webkit-calc(100%)",
-    backgroundColor: "#192635",
+    backgroundColor: "#191970",
     overflow: "hidden",
 }
 

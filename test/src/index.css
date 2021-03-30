@@ -19,12 +19,21 @@ aside {
  color: white;
 }
 
-.aside1, .aside2 {
+.aside1 {
   width: 300px;
 }
 
-.welcome-aside {
+.aside2 {
+  border-left: .1em solid #A7C7E7;
+}
+
+.welcome-aside, .aside2 {
   width: 250px;
+  background-color: #192635
+}
+
+.welcome-aside {
+  border-right: .1em solid #A7C7E7;
 }
 
 .home-button {
@@ -73,9 +82,9 @@ aside {
 
 @media all and (min-width: 800px) {
   .main-content    { flex: 2 0px; }
-  .aside-1 { order: 1; } 
+  .welcome-aside { order: 1; } 
   .main-content    { order: 2; }
-  .aside-2 { order: 3; }
+  .aside2 { order: 3; }
 
 }
 

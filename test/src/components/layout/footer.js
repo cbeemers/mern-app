@@ -21,5 +21,5 @@ const footer = {
 
     // backgroundColor: "#0e0650",
     backgroundColor: "#192635",
-    borderTop: ".5em solid black"
+    borderTop: ".1em solid #A7C7E7"
 }

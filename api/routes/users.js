@@ -4,22 +4,24 @@ const jwt = require('jsonwebtoken');
 const fetch = require('node-fetch');
 const mailer = require('nodemailer');
 // const { request } = require('../app.js');
-// const multer = require('multer')
+const multer = require('multer')
 // var multers3 = require('multer-s3')
 // var AWS = require('aws-sdk')
+// const upload = require('../storage/upload')
 
 require('dotenv').config();
 
 let User = require('../models/user.model.js');
 
- 
-// User.createIndexes({(firstName + lastName): 1})
 const secret = process.env.SECRET;
 
 async function checkToken(token) {
-    const user = await fetch("http://localhost:9000/checkToken?token="+token);
-    const json = await user.json();
-    const email = json['email'];
+    let email
+    const user = await fetch("http://localhost:9000/checkToken?token="+token).then(async (user) => {
+        await user.json().then(data => {
+            email = data['email'];
+        })
+    })
 
     return email
 }
@@ -103,7 +105,8 @@ router.route('/findUser').get(async (req, res) => {
                     result.push({
                         "firstName": data["firstName"],
                         "lastName": data["lastName"],
-                        "_id": data["_id"]
+                        "_id": data["_id"], 
+                        "profilePicture": data['profilePicture']
                     })
                 }
             })
@@ -224,75 +227,34 @@ router.route('/deleteRequest').post(async (req, res) => {
     res.status(200).json({msg: "Request deleted"})
 })
 
-// router.route('/addProfilePicture').post(async (req, res) => {
-//     const {id} = req.query
-//     const {file} = req.body
+router.route('/addById').post(async (req, res) => {
+    const {type, _id} = req.query
+    const {fileName} = req.body
 
-//     // const upload = multer({
-//     //     storage: multers3({
-//     //         s3: s3, 
-//     //         bucket: 'my-user-pictures',
-//     //         acl: 'public-read',
-//     //         metadata: function(req, file, cb) {
-//     //             cb(null, {fieldName: file.fieldName})
-//     //         },
-//     //         key: function(req, file, cb) {
-//     //             console.log(file)
-//     //             cb(null, req.id)
-//     //         }
-//     //     })
-//     // })
-//     const fileUpload = upload.single('image')
-
-//     fileUpload(async (req, res, err) => {
-//         if (err) {
-            
-//         }
-//         else {
-            
-//         }
-//     }).then(downloadUrl => {
-        
-//     })
-//     res.status(200).json({msg: "Success"})
-//     // res.status(200).json({msg: "Success"})
-
-//     // params.Key = id
-//     // var fs = require('fs')
-//     // var fileStream = fs.createReadStream(file)
+    await User.findOne({_id}, async function(err, user) {
+        if (!user) {res.status(404).json({msg:"No user found"})}
+        else {
+            await User.updateOne({_id}, {$set: {profilePicture: fileName}})
+            res.status(200).json({msg: fileName})
+        }
+    })
+})
+// let multer = require('multer')
+// let upload = multer({ dest: 'my-user-pictures' });
+let upload = require('../storage/upload')
+router.route('/addProfilePicture').post(upload.any(), async function(req, res) {
+    const {_id} = req.query
+    console.log(req.body)
+    const uri = req.files[0].location
+    
+    await User.updateOne({_id}, {$set: {profilePicture: uri}}, function (err, user) {
+        if (!err) {
+            res.status(200).json({picture: uri})
+        }
+    })
 
 
-//     // fileStream.on('error', function(err) {
-//     //     res.status(401).json({msg: err})
-//     // })
+})
 
-//     // params.Body = fileStream
-//     // if (!fileStream.error) {
-//     //     bucket.upload(params, function(err, data) {
-//     //         if (err) {
-//     //             res.status(400).json({msg: err})
-//     //             return
-//     //         } else {
-//     //             res.status(200).json({data})
-//     //             return
-//     //         }
-//     //     })
-//     // }
-// })
-
-// router.route('/getProfilePicture').get(async (req, res) => {
-//     // const {id} = req.query
-//     params.Key = "profile-default.png"
-
-//     await s3.getObject(params, function(err, data) {
-//         if (err) {
-//             res.status(400).json({msg: err})
-//         }
-//         else {
-//             res.status(200).json({data})
-//         }
-//     })
-
-// })
 
 module.exports = router;

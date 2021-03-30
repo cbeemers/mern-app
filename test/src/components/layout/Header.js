@@ -24,6 +24,7 @@ const head = {
   paddingBottom: "1em",
   // backgroundColor: "#0e0650"
   backgroundColor: "#192635",
+  borderBottom: ".1em solid #A7C7E7"
   // borderBottom: ".5em solid black"
 
 }

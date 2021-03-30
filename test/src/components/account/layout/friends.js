@@ -37,6 +37,7 @@ export default class FriendsDisplay extends Component {
             }
         }).then((res) => {
             res.json().then(data => {
+                // console.log(data['users'])
                 that.setState({searchResults: data['users'], display: "search"})
             })
         })
@@ -145,10 +146,11 @@ export default class FriendsDisplay extends Component {
     }
 
     render() {
+
         return(
             <div style={{width: "100%"}}>
             <Header title={"Your Friends"}/>
-            <div style={search}>
+            <div style={tempSearch}>
             <form onSubmit={this.handleSubmit}>
                 <input style={{width: "20em"}} id="search" placeholder="Friend" onChange={this.handleChange} /><input text="search" className="submit"  type="submit" />
             </form>
@@ -163,11 +165,14 @@ export default class FriendsDisplay extends Component {
 let content = {
     display: "flex",
     justifyContent: "space-between",
-    
-    // color: "red", 
     padding: "1em",
     borderBottom: ".5em solid black"
 }
+
+// Make deep copy of the search CSS object, add a border to the bottom
+let tempSearch = JSON.parse(JSON.stringify(search))
+tempSearch.borderBottom = ".5em solid black"
+
 
 let drop = {
     width: "5em",

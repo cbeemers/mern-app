@@ -12,9 +12,9 @@ class Navbar extends React.Component {
         super(props);
 
         let links = [
-            <Link to="/" className="navbar-brand">Home</Link>,
-            <Link to="/weather" className="navbar-brand">Weather</Link>,
-            <Link to="/stocks" className="navbar-brand">Stocks</Link>,
+            <Link to="/" onClick={this.home}className="navbar-brand">Home</Link>,
+            // <Link to="/weather" className="navbar-brand">Weather</Link>,
+            // <Link to="/stocks" className="navbar-brand">Stocks</Link>,
         ];
 
         this.state = {
@@ -35,9 +35,16 @@ class Navbar extends React.Component {
             );
             links.push(<Link onClick={this.logout} to="/" className="navbar-brand">Logout</Link>);
         } else {
-            links.push(<Link to="/login" className="navbar-brand">Login</Link>);
+            // links.push(<Link to="/login" className="navbar-brand">Login</Link>);
         }
         this.setState({links: links})
+    }
+
+    home = () => {
+        if (window.location.pathname == "/") {
+            window.location.reload(true)
+        }
+        
     }
 
 
@@ -52,15 +59,13 @@ class Navbar extends React.Component {
     logout = () => {
         document.cookie = "token=; expires = Thu, 01 Jan 1970 00:00:00 GMT";
         let links = [
-            <Link to="/" className="navbar-brand">Welcome</Link>,
-            <Link to="/weather" className="navbar-brand">Weather</Link>,
-            <Link to="/stocks" className="navbar-brand">Stocks</Link>,
-            <Link to="/login" className="navbar-brand">Login</Link>
+            // <Link to="/" className="navbar-brand">Welcome</Link>,
+            // <Link to="/login" className="navbar-brand">Login</Link>
         ];
         this.setState({links});
 
         if(window.location.pathname == '/') {
-            window.location.reload(false);
+            window.location.reload(true);
         }
     }
 
@@ -76,7 +81,8 @@ class Navbar extends React.Component {
 
 const color = {
     // backgroundColor: "#0e0650",
-    backgroundColor: "#192635"
+    backgroundColor: "#192635",
+    borderBottom: ".1em solid #A7C7E7"
     // textAlign: "center"
 }
 

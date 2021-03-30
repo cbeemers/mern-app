@@ -291,7 +291,7 @@ export default class Stock extends Component {
         return (
             <div style={{minHeight: "-webkit-calc(100%)", backgroundColor: "#192635",}}>
             <Header title={"Stocks"} />
-            <div style={account,{border: ".5em solid black", minHeight: "100vh"}}>
+            <div style={account,{minHeight: "100vh", backgroundColor: "#192635"}}>
                 
             
             

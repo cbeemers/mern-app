@@ -36,7 +36,7 @@ export default class RequestsDisplay extends Component {
             })
         } else {
             return (
-                <div style={{textAlign: "center", padding: "2em"}}><h3>No new friend requests.</h3></div>
+                <div style={{textAlign: "center", padding: "2em"}}><h3 style={{color: "black"}}>No new friend requests.</h3></div>
             )
         }
     }
@@ -51,8 +51,6 @@ export default class RequestsDisplay extends Component {
         let action = event.target.name
         
         // await fetch("h")
-
-        let count
     
         if (action == "accept") {
             await fetch("http://localhost:9000/friendships/exists?senderId="+userId+"&addedId="+_id, {

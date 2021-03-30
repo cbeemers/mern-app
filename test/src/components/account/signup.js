@@ -63,7 +63,7 @@ export default class Signup extends React.Component {
 
                 }).then(res => {
                     if (res.status == 200) {
-                        this.props.history.push('/login');
+                        window.location.reload(true);
                     } else if (res.status === 401) {
                         console.log(res)
                         this.setState({

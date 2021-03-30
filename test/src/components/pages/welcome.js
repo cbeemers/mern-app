@@ -37,7 +37,9 @@ const welcome = {
     color: "white",
     margin: "0",
     textAlign: "center",
-    position: "relative"
+    position: "relative", 
+    // marginRight: "auto", 
+    // marginLeft: 'auto'
 }
 
 const content = {

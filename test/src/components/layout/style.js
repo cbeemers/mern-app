@@ -47,7 +47,7 @@ const label = {
 const msg = {
     textAlign: "center",
     paddingTop: "2em",
-    backgroundColor: "#192635",
+    // backgroundColor: "#192635",
     color: "grey",
 }
 
@@ -58,7 +58,7 @@ const profileContent = {
 const search = {
     textAlign: "center",
     padding: "2em 0",
-    backgroundColor: "#192635",
+    // backgroundColor: "#192635",
 }
 
 const stockWidget = {

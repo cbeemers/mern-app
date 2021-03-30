@@ -54,6 +54,11 @@ const userSchema = new SCHEMA ({
     bio: {
       type: String,
       required: false,
+    },
+    profilePicture: {
+      type: String,
+      required: false,
+      default: "https://my-user-pictures.s3.us-east-2.amazonaws.com/profile-default.png"
     }
     // picture {
     //   type:  
