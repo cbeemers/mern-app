@@ -1,37 +1,52 @@
 import React, {Component} from 'react';
 import {getCookie} from '../../cookie';
 import Header from '../../layout/Header'
+import Profile from './profile'
 
 import {search, displayed} from '../../layout/style'
 
 export default class FriendsDisplay extends Component {
     constructor(props) {
         super(props)
-
+        // console.log(props.friends)
+        let header = (<Header title={"Your Friends"} />)
+        if (props.header !== undefined) {
+            header = props.header
+        }
+        
         this.state = {
             friends: props.friends,
             query: props.query,
             searchResults: [],
-            display: props.display,
+            display: "friends",
             firstName: props.firstName,
             lastName: props.lastName, 
             _id: props.id,
             token: props.token,
+            header,
+            profileId: "",
+            type: props.type
+            
 
         }
+        // this.displayFriends = props.displayFriends.bind(this);
+        this.openProfile = this.props.openProfile.bind(this);
+        this.friendshipExists = this.props.friendshipExists.bind(this);
+        
     }
+
 
     search = async () => {
         let {query} = this.state
-        query = String(query).replace(/ /g, "").toLowerCase()
+        let find = String(query).replace(/ /g, "").toLowerCase()
         let that = this
         let {_id} = this.state
         
-        if (this.state.friends.includes(query)) {
+        if (this.state.friends.includes(find)) {
             console.log(query)
         }
-        console.log(query)
-        await fetch("http://localhost:9000/users/findUser?userId="+_id+ "&fullName="+query, {
+        // console.log(query)
+        await fetch("http://localhost:9000/users/findUser?userId="+_id+ "&fullName="+find, {
             method: "GET", 
             headers: {
                 'Content-Type': 'application/json'
@@ -39,7 +54,8 @@ export default class FriendsDisplay extends Component {
         }).then((res) => {
             res.json().then(data => {
                 // console.log(data['users'])
-                that.setState({searchResults: data['users'], display: "search"})
+                that.setState({searchResults: data['users'], display: "search", header: null})
+                that.setState({header: <Header title={"Results for '"+query+"'"} />})
             })
         })
     }
@@ -106,6 +122,24 @@ export default class FriendsDisplay extends Component {
         this.setState({query: event.target.value});
     }
 
+    // openProfile = (event) => {
+    //     let id = event.target.id
+    //     console.log(id)
+    //     if (id) {
+    //         this.setState({display: <Profile userId={id} />, profileId: id, header: null})
+    //     } else {
+            
+    //     }
+    // }
+
+    displayRemove = (id) => {
+        let {type} = this.state
+        if (type === "user") {
+            return (<button onClick={this.removeFriend} id={id} style={{float: "right", marginTop: "auto", marginBottom: "auto", borderRadius: "15%"}}>Remove</button>)
+        }
+    }
+
+
     displayFriends = () => {
         let {display, friends, _id, searchResults} = this.state
 
@@ -115,7 +149,7 @@ export default class FriendsDisplay extends Component {
                 // friend = friend[0].toUpperCase() + friend.slice(1)
                 let friendship = friend['friendship']
                 let index = 0
-
+                // console.log(_id)
                 if (friendship[index]['id'] == _id) {
                     index = 1
                 }
@@ -123,16 +157,17 @@ export default class FriendsDisplay extends Component {
                 let name = friendship[index]["firstName"] + " " + friendship[index]["lastName"]
 
                 return (
-                <div style={content}>
+                <div onClick={this.openProfile} id={friendship[index]["id"]} style={content}>
                     <div style={{display:"flex"}}>
                     <img className="profile-picture-else" src={friendship[index]["profilePicture"]} />
                     <h3 style={{ color: "black", margin: "auto 0" , padding: "1em"}}>{name}</h3></div>
-                    <button onClick={this.removeFriend} id={friendship[index]["id"]} style={{float: "right", marginTop: "auto", marginBottom: "auto"}}>Remove</button>
+                    {this.displayRemove(friendship[index]["id"])}
                 </div>
                 )
             })
         }
         else if (display == "search") {
+
             if (searchResults.length > 0) {
                 return searchResults.map((result, index) => {
                     let que = result["firstName"] + " " + result["lastName"]
@@ -150,20 +185,36 @@ export default class FriendsDisplay extends Component {
             else {
                 return <div><h3 style={{textAlign: "center", paddingTop: "2em"}}>No users found.</h3></div>
             }
+        } 
+        else {
+            return display
+        }
 
+        // else if (display === "profile") {
+        //     return <Profile id={this.state.profileId} />
+        // }
+
+        
+    }
+
+    displaySearch = () => {
+        if (this.state.profileId === "") {
+           return (
+                <div style={tempSearch}>
+                <form onSubmit={this.handleSubmit}>
+                    <input style={{width: "20em"}} id="search" placeholder="Friend" onChange={this.handleChange} /><input text="search" className="submit"  type="submit" />
+                </form>
+                </div>
+            ) 
         }
     }
 
     render() {
-
+        let {header} = this.state
         return(
             <div style={{width: "100%"}}>
-            <Header title={"Your Friends"}/>
-            <div style={tempSearch}>
-            <form onSubmit={this.handleSubmit}>
-                <input style={{width: "20em"}} id="search" placeholder="Friend" onChange={this.handleChange} /><input text="search" className="submit"  type="submit" />
-            </form>
-            </div>
+            {header}
+            {this.displaySearch()}
             <div style={{color: "black"}}>
             {this.displayFriends()}
             </div>

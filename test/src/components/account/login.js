@@ -64,7 +64,7 @@ class Login extends React.Component {
         const {message} = this.state;
         return (
             <div style={account2}>
-            <Header title={"Login"} />
+            <Header title={"Login"} color={'#191970'} />
             
             <div style={form_style}>
             <form style={border} onSubmit={this.submit}>

@@ -94,10 +94,10 @@ router.route('/exists').get(async (req, res) => {
     ]}}, 
     function(err, found) {
         if (found) {
-            res.status(400).json({result: "found"})
+            res.status(200).json({result: "found"})
         }
         else {
-            res.status(200).json({result: "none"})
+            res.status(404).json({result: "none"})
         }
     })
 
@@ -120,7 +120,7 @@ router.route('/update').post(async (req, res) => {
     let {id} = req.query
     let {firstName, lastName, profilePicture} = req.body
 
-    
+
 
 })
 

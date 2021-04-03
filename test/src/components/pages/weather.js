@@ -6,6 +6,7 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import Header from '../layout/Header';
 import WeatherWidget from '../widgets/weather.widget';
 import {getCookie} from '../cookie';
+import weatherSearch from '../functions/search'
 
 import {search, account, msg, calendar} from '../layout/style';
 
@@ -101,7 +102,7 @@ export default class Weather extends Component {
             });
 
             this.search(city, state);
-            console.log(this.getFavorites());
+            // console.log(this.getFavorites());
 
         } catch(TypeError) {
             this.setState({
@@ -114,10 +115,12 @@ export default class Weather extends Component {
     search = async (city, state) => {
         const {query} = this.state;
 
-        const uri = 'http://localhost:9000/weather?location='+city+','+state;
-        const response = await fetch(uri);
-        const json = await response.json();
-         
+        // const uri = 'http://localhost:9000/weather?location='+city+','+state;
+        // const response = await fetch(uri);
+        // const json = await response.json();
+        
+        let json = await weatherSearch(city, state)
+    
         let favorite = null;
         if (getCookie("token") != "") {
             favorite = <button style={calendar} onClick={this.addFavorite}>Add Favorite</button>

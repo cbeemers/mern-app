@@ -26,10 +26,6 @@ const userSchema = new SCHEMA ({
       type: Array,
       required: false,
     }, 
-    friends: {
-      type: Array,
-      required: true
-    },
     messages: {
       type: Array, 
       required: true

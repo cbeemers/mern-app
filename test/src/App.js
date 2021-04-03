@@ -5,10 +5,9 @@ import {BrowserRouter as Router, Route} from 'react-router-dom';
 
 import Signup from './components/account/signup';
 import Login from './components/account/login';
-import Sports from './components/pages/sports';
 import Weather from './components/pages/weather';
 import Stocks from './components/pages/stocks';
-import Profile from './components/account/profile';
+import Profile from './components/account/userProfile';
 import FriendsPage from './components/account/friends';
 import Home from './components/pages/home';
 import Navbar from './components/layout/navbar'
@@ -21,8 +20,7 @@ function App() {
       <Navbar />
       <Route path="/" exact component={Home}></Route>
       <Route path="/signup" exact component={Signup}></Route>
-      <Route path="/login" exact component={Login}></Route>
-      <Route path="/sports" exact component={Sports}></Route>
+      <Route path="/login" exact component={Login}></Route> 
       <Route path="/weather" exact component={Weather}></Route>
       <Route path="/stocks" exact component={Stocks}></Route>
       <Route path="/profile" exact component={Profile}></Route>

@@ -11,8 +11,28 @@ export default class Welcome extends Component{
 
         this.state = {
             user: props.user,
+            token: props.token,
+            userId: props.userId,
+            preferences: null,
         }
     }
+
+    // componentDidMount() {
+    //     let {token, userId} = this.state
+    //     let that = this
+
+    //     if (token != "") {  
+    //         fetch("http://localhost:9000/preferences/getAll?id="+userId, {
+    //             method: "GET",
+    //         }).then(res => {
+    //             if (res.status === 200) {
+    //                 // res.json().then(data)
+
+    //                 // that.setState({preferences: })
+    //             }
+    //         })
+    //     }   
+    // }
 
     render() {
         const user = this.props.user

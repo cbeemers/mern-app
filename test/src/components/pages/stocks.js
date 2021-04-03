@@ -63,6 +63,7 @@ export default class Stock extends Component {
             addFavorite: null,
             favorites: favorites,
             token: getCookie('token'),
+            graphType: null
         }
         
         // if (this.state.token != "") {
@@ -139,20 +140,20 @@ export default class Stock extends Component {
         let type = event.target.id
 
         if (graph != null) {
-            // console.log(type)
             this.setState({
-                graph: null
+                graph: null,
+                graphType: null,
             });
-            
         }
 
         const {year, date, month, json, query, day} = this.state;
-        // console.log(type)
-        await this.setState({
+        console.log(type)
+        this.setState({
             graph: <StockGraph year={year} json={json} stock={query} type={type} day={day} month={month} />,
+            graphType: type
         });
         // console.log(this.state.graph)
-        // this.drop();
+        this.drop();
     }
 
     addFavorite = async() => {
@@ -193,6 +194,7 @@ export default class Stock extends Component {
                 <button style={{marginRight: "1em"}} onClick={this.graph} id="monthly">Monthly</button>
                 <button onClick={this.graph} id="year">This year</button>
             </div>,
+            graph: null
         });
     
     }

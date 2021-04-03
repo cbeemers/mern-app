@@ -93,10 +93,6 @@ export default class StockGraph extends Component {
         }
     }
 
-    month = () => {
-        
-    }
-
 
     render() {
         const {data, stock, month, year, type, average} = this.state;

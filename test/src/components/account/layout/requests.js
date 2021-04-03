@@ -21,15 +21,16 @@ export default class RequestsDisplay extends Component {
     }
 
     display = () => {
-        console.log(this.state.userPicture)
         if (this.state.requests.length > 0) {
             return this.state.requests.map((result, index) => {
                 let fullName = result["firstName"] + " " + result["lastName"]
                 let que = result["firstName"] + "-" + result["lastName"] + "-" + result['profilePicture']
                 return (
                     <div style={content}>
+                    <div style={{display: "flex"}}>
                     <img className="profile-picture-else" src={result['profilePicture']} />
-                    <h3 style={{marginTop:"auto", marginBottom: "auto"}}>{fullName}</h3>
+                    <h3 style={{padding: "1em", marginTop:"auto", marginBottom: "auto"}}>{fullName}</h3>
+                    </div>
                     <div style={cluster}>
                     <button style={drop, {backgroundImage: "none"}} name="accept" value={que} id={result['_id']} onClick={this.respond}>Accept</button>
                     <button style={drop, {backgroundImage: "none"}} name="decline" value={que} id={result['_id']} onClick={this.respond}>Decline</button>

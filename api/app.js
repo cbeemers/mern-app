@@ -24,6 +24,7 @@ var usersRouter = require('./routes/users');
 var weatherRouter = require('./routes/weather');
 var stockRouter = require('./routes/stock');
 var friendshipRouter = require('./routes/friendships');
+var preferenceRouter = require('./routes/preferences');
 // var withAuth = require('./routes/middleware')
 
 
@@ -66,6 +67,7 @@ app.use('/users', usersRouter);
 app.use('/friendships', friendshipRouter);
 app.use('/weather', weatherRouter, cors());
 app.use('/stock', stockRouter);
+app.use('/preferences', preferenceRouter)
 app.get('/checkToken', (req, res) => {
 
   const token = req.query.token;
