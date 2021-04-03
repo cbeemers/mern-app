@@ -106,7 +106,7 @@ export default class Home extends Component{
         let {token, userId, user, userLast, display} = this.state;
         let that = this;
         
-        // if (display.type != (<FriendsController />).type) {
+        if (display.type != (<FriendsController />).type) {
             if (token != "") {
                 await fetch("http://localhost:9000/friendships/getAll?id="+userId, {
                     method: "GET",
@@ -122,13 +122,13 @@ export default class Home extends Component{
                     })
                 })
             }
-        // } 
-        // else {
-        //     let {friendData} = this.state
-        //     this.setState({display: null})
-        //     this.setState({display: <FriendsController display="friends" token={token} friends={friendData['data']} id={userId} firstName={user} lastName={userLast} query="" />
-        //     })
-        // }
+        } 
+        else {
+            let {friendData} = this.state
+            await this.setState({display: null})
+            await this.setState({display: <FriendsController display="friends" token={token} friends={friendData['data']} id={userId} firstName={user} lastName={userLast} query="" />
+            })
+        }
 
     }
 

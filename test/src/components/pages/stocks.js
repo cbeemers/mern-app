@@ -140,7 +140,7 @@ export default class Stock extends Component {
         let type = event.target.id
 
         if (graph != null) {
-            this.setState({
+            await this.setState({
                 graph: null,
                 graphType: null,
             });
@@ -148,7 +148,7 @@ export default class Stock extends Component {
 
         const {year, date, month, json, query, day} = this.state;
         console.log(type)
-        this.setState({
+        await this.setState({
             graph: <StockGraph year={year} json={json} stock={query} type={type} day={day} month={month} />,
             graphType: type
         });
@@ -194,7 +194,7 @@ export default class Stock extends Component {
                 <button style={{marginRight: "1em"}} onClick={this.graph} id="monthly">Monthly</button>
                 <button onClick={this.graph} id="year">This year</button>
             </div>,
-            graph: null
+            // graph: null
         });
     
     }
