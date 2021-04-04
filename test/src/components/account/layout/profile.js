@@ -16,9 +16,8 @@ export default class Profile extends Component {
             profilePicture: "",
             display: null,
             header: null,
-            // exists: props.exists,
+            exists: props.exists,
         }
-        console.log(props.exists)
 
         this.openProfile = this.props.openProfile.bind(this);
         this.friendshipExists = this.props.friendshipExists.bind(this);
@@ -27,7 +26,7 @@ export default class Profile extends Component {
     }
 
     componentDidMount() {
-        let {userId} = this.state
+        let {userId, exists} = this.state
         let that = this
         // console.log(userId)
 
@@ -41,12 +40,11 @@ export default class Profile extends Component {
                     lastName: data['lastName'], 
                     profilePicture: data['profilePicture'], 
                     joinedDate: data['joinedDate'],
-                    header: <ProfileHeader profilePicture={data['profilePicture']} firstName={data['firstName']} lastName={data['lastName']} joinedDate={data['joinedDate']} />
+                    header: <ProfileHeader addFriend={this.addFriend} id={userId} profilePicture={data['profilePicture']} firstName={data['firstName']} lastName={data['lastName']} joinedDate={data['joinedDate']} exists={exists}/>
                 })
                 console.log(data)
             })
         })
-        // this.forceUpdate()
     }
 
     getFriends = async (event) => {

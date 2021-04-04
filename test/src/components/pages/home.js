@@ -2,13 +2,13 @@ import React, {Component} from 'react';
 
 import {getCookie} from '../cookie';
 import Welcome from './welcome'
-import FriendsDisplay from '../account/layout/friends'
+// import FriendsDisplay from '../account/layout/friends'
 import RequestsDisplay from '../account/layout/requests'
 import Login from '../account/login'
 import Weather from '../pages/weather'
 import Stock from '../pages/stocks'
 import Signup from '../account/signup'
-import { profileContent } from '../layout/style';
+// import { profileContent } from '../layout/style'; 
 import FriendsController from '../controllers/friends-controller'
 
 // import background from '/background.php';

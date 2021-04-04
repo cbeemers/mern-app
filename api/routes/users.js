@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const { json } = require('body-parser');
 const jwt = require('jsonwebtoken');
 const fetch = require('node-fetch');
 const mailer = require('nodemailer');
@@ -152,9 +153,7 @@ router.route('/getUser').get(async (req, res) => {
 
     User.findOne({_id}, function(err, user) {
         if (user) {
-            res.status(200).json({firstName: user['firstName'], lastName: user['lastName'], profilePicture: user['profilePicture'], joinedDate: user['createdAt']})
-        } else {
-            res.status(404).json({msg: "user not found"})
+            res.status(200).json({firstName: user['firstName'], lastName: user['lastName'], profilePicture: user['profilePicture']})
         }
     })
 })
@@ -213,6 +212,11 @@ router.route('/sendRequest').post(async (req, res) => {
                     lastName: senderLast,
                     profilePicture: json['profilePicture']
                 })
+                //     {
+                //     firstName: firstName, 
+                //     lastName: lastName,
+                //     _id: sender_id,
+                // })
                 await User.updateOne({_id: _id}, {$set:{requests: values}});
                 res.status(200).json({msg: "Success"});
             }

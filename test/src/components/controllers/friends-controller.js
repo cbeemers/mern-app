@@ -52,7 +52,7 @@ export default class FriendsController extends Component {
                     // console.log("yo")
                     // return
                 }
-                let displayComponent = (<Profile addFriend={this.addFriend} friendshipExists={this.friendshipExists} userId={id} openProfile={this.openProfile} />)
+                let displayComponent = (<Profile addFriend={this.addFriend} friendshipExists={this.friendshipExists} userId={id} openProfile={this.openProfile} exists={exists} />)
                 stack.enqueue(displayComponent)
                 await this.setState({displayComponent, stack, profileId: id, exists})
                 
@@ -74,7 +74,6 @@ export default class FriendsController extends Component {
         })
         console.log("should be second")
         return exists;
-        
     }
 
     displayStackNav = () => {
@@ -82,12 +81,12 @@ export default class FriendsController extends Component {
         // let exists = await this.friendshipExists(profileId)
 
         if (this.state.stack.index >= 1) {
-            let addButton = (<button style={{float: "right", borderRadius: "10%"}} onClick={(e) => this.addFriend(profileId, e)}>Add Friend</button>)
+            // let addButton = (<button style={{float: "right", borderRadius: "10%"}} onClick={(e) => this.addFriend(profileId, e)}>Add Friend</button>)
 
             return (
                 <div style={{height: "2em", width: "100%", backgroundColor: "#192635", padding: "1em"}}>
                     <img onClick={this.backPage} style={{height: "2em", width: "2em", borderRadius: "10%"}} src="./img/backArrow.png"/>
-                    {!exists && _id != profileId && addButton}
+                    {/* {!exists && _id != profileId && addButton} */}
                 </div>
             )
         }
