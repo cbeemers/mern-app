@@ -76,8 +76,8 @@ export default class FriendsDisplay extends Component {
         })
     }
 
-    removeFriend = async (event) => {
-        const removedId = event.target.id
+    removeFriend = async (removedId, event) => {
+        
         const {_id} = this.state
         let that = this
         
@@ -135,7 +135,7 @@ export default class FriendsDisplay extends Component {
     displayRemove = (id) => {
         let {type} = this.state
         if (type === "user") {
-            return (<button onClick={this.removeFriend} id={id} style={{float: "right", marginTop: "auto", marginBottom: "auto", borderRadius: "15%"}}>Remove</button>)
+            return (<button onClick={(e) => this.removeFriend(id, e)} style={{float: "right", marginTop: "auto", marginBottom: "auto", borderRadius: "15%"}}>Remove</button>)
         }
     }
 
@@ -148,6 +148,8 @@ export default class FriendsDisplay extends Component {
             return friends.map((friend, i) => {
                 // friend = friend[0].toUpperCase() + friend.slice(1)
                 let friendship = friend['friendship']
+
+                // Index into friendship array for the non current user
                 let index = 0
                 // console.log(_id)
                 if (friendship[index]['id'] == _id) {
@@ -157,7 +159,7 @@ export default class FriendsDisplay extends Component {
                 let name = friendship[index]["firstName"] + " " + friendship[index]["lastName"]
 
                 return (
-                <div onClick={this.openProfile} id={friendship[index]["id"]} style={content}>
+                <div onClick={(e) => this.openProfile(friendship[index]["id"], e)} style={content}>
                     <div style={{display:"flex"}}>
                     <img className="profile-picture-else" src={friendship[index]["profilePicture"]} />
                     <h3 style={{ color: "black", margin: "auto 0" , padding: "1em"}}>{name}</h3></div>

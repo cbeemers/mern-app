@@ -34,10 +34,10 @@ export default class FriendsController extends Component {
         }
     }
 
-    openProfile = async (event) => {
-        let id = event.target.id
+    openProfile = async (id, event) => {
+        // let id = event.target.id
         let {stack, _id} = this.state
-        console.log(_id)
+        console.log(id)
         let exists = await this.friendshipExists(id)
         console.log(exists)
         
@@ -74,6 +74,8 @@ export default class FriendsController extends Component {
 
     displayStackNav = () => {
         if (this.state.stack.index >= 1) {
+            let add = (<button></button>)
+
             return (
                 <div style={{height: "2em", width: "100%", backgroundColor: "#192635", padding: "1em"}}>
                     <img onClick={this.backPage} style={{height: "2em", width: "2em", borderRadius: "10%"}} src="./img/backArrow.png"/>
@@ -81,10 +83,6 @@ export default class FriendsController extends Component {
             )
         }
 
-    }
-    
-    forceful = () => {
-        this.forceUpdate();
     }
 
     backPage = async () => {
