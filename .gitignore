@@ -1,2 +1,3 @@
 **/node_modules
 api/.env
+test/src/components/widgets/canvasjs-2.3.2/examples

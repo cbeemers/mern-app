@@ -16,12 +16,13 @@ export default class Profile extends Component {
             profilePicture: "",
             display: null,
             header: null,
-            exists: props.exists,
+            // exists: props.exists,
         }
         console.log(props.exists)
 
         this.openProfile = this.props.openProfile.bind(this);
         this.friendshipExists = this.props.friendshipExists.bind(this);
+        this.addFriend = this.props.addFriend.bind(this);
         
     }
 
@@ -55,8 +56,8 @@ export default class Profile extends Component {
 
         await fetch("http://localhost:9000/friendships/getAll?id="+userId).then(res => {
           res.json().then(data => {
-              console.log(data['data'])
-              console.log(userId)
+            //   console.log(data['data'])
+            //   console.log(userId)
               that.setState({display: <FriendsDisplay 
                 friends={data['data']} firstName={firstName}
                 lastName={lastName}
@@ -66,6 +67,7 @@ export default class Profile extends Component {
                 openProfile={that.openProfile}
                 type="profile"
                 friendshipExists={this.friendshipExists}
+                addFriend={this.addFriend}
                 
                 />})
           })  

@@ -29,9 +29,16 @@ export default class FriendsDisplay extends Component {
             
 
         }
-        // this.displayFriends = props.displayFriends.bind(this);
+        
+        // Open profile is function of the friends component controller
+        // Opens a profile of a user that is being displayed by either a profile page or users friends page
         this.openProfile = this.props.openProfile.bind(this);
         this.friendshipExists = this.props.friendshipExists.bind(this);
+        this.addFriend = this.props.addFriend.bind(this);
+        if (this.props.removeFriend) {
+            this.removeFriend = this.props.removeFriend.bind(this);
+        }
+        
         
     }
 
@@ -60,56 +67,55 @@ export default class FriendsDisplay extends Component {
         })
     }
 
-    addFriend = async (event) => {
-        const _id = event.target.id
-        const {firstName, lastName, token} = this.state
+    // addFriend = async (_id, event) => {
+    //     // const _id = event.target.id
+    //     const {firstName, lastName, token} = this.state
 
-        await fetch("http://localhost:9000/users/sendRequest?_id="+_id+"&firstName="+firstName+"&lastName="+lastName+"&token="+token, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        }).then((res) =>{
-            res.json().then(data => {
-                console.log(data)
-            })
-        })
-    }
+    //     await fetch("http://localhost:9000/users/sendRequest?_id="+_id+"&firstName="+firstName+"&lastName="+lastName+"&token="+token, {
+    //         method: 'POST',
+    //         headers: {
+    //             'Content-Type': 'application/json'
+    //         }
+    //     }).then((res) =>{
+    //         res.json().then(data => {
+    //             console.log(data)
+    //         })
+    //     })
+    // }
 
-    removeFriend = async (removedId, event) => {
+    // removeFriend = async (removedId, event) => {
+    //     event.preventDefault()
+    //     const {_id} = this.state
+    //     let that = this
         
-        const {_id} = this.state
-        let that = this
-        
-        if (window.confirm("Remove friend?")) {
-            await fetch("http://localhost:9000/friendships/remove?senderId="+_id+"&removedId="+removedId, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                }).then((res) => {
-                    res.json().then(async (result) => {
-                        console.log(result)
-                        if (result['msg'] == "success") {
-                            await fetch("http://localhost:9000/friendships/getAll?id="+_id, {
-                                method: "GET",
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                }
-                            }).then((res) => {
-                                res.json().then(data => {
-                                    console.log(data)
-                                    that.setState({
-                                        friends: data['data']
-                                    })
-                                })
-                            })
-                        }
-                    })
-                })
-        // })
-        }
-    }
+    //     if (window.confirm("Remove friend?")) {
+    //         await fetch("http://localhost:9000/friendships/remove?senderId="+_id+"&removedId="+removedId, {
+    //                 method: 'POST',
+    //                 headers: {
+    //                     'Content-Type': 'application/json'
+    //                 }
+    //             }).then((res) => {
+    //                 res.json().then(async (result) => {
+    //                     console.log(result)
+    //                     if (result['msg'] == "success") {
+    //                         await fetch("http://localhost:9000/friendships/getAll?id="+_id, {
+    //                             method: "GET",
+    //                             headers: {
+    //                                 'Content-Type': 'application/json',
+    //                             }
+    //                         }).then((res) => {
+    //                             res.json().then(data => {
+    //                                 console.log(data)
+    //                                 that.setState({
+    //                                     friends: data['data']
+    //                                 })
+    //                             })
+    //                         })
+    //                     }
+    //                 })
+    //             })
+    //     }
+    // }
     
 
     handleSubmit = (event) => {
@@ -135,7 +141,7 @@ export default class FriendsDisplay extends Component {
     displayRemove = (id) => {
         let {type} = this.state
         if (type === "user") {
-            return (<button onClick={(e) => this.removeFriend(id, e)} style={{float: "right", marginTop: "auto", marginBottom: "auto", borderRadius: "15%"}}>Remove</button>)
+            return (<button title="remove" onClick={(e) => this.removeFriend(id, e)} style={{float: "right", marginTop: "auto", marginBottom: "auto", borderRadius: "15%"}}>Remove</button>)
         }
     }
 
@@ -173,13 +179,14 @@ export default class FriendsDisplay extends Component {
             if (searchResults.length > 0) {
                 return searchResults.map((result, index) => {
                     let que = result["firstName"] + " " + result["lastName"]
+                    
                     return (
-                        <div style={content}>
+                        <div onClick={(e) => this.openProfile(result['_id'], e)} style={content}>
                         <div style={{display: "flex"}}>
                         <img className="profile-picture-else" src={result['profilePicture']}/>
                         <h3 style={{padding: "1em", marginTop:"auto", marginBottom: "auto"}}>{que}</h3>
                         </div>
-                        <button style={drop, {backgroundImage: "none", margin: "auto 0"}} id={result['_id']} onClick={this.addFriend}>Add friend</button>
+                        <button title="add" style={drop, {backgroundImage: "none", margin: "auto 0"}} onClick={(e) => this.addFriend(result['_id'], e)}>Add friend</button>
                         </div>
                     )
                 })
