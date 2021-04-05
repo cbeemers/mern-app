@@ -22,6 +22,7 @@ export default class Profile extends Component {
         this.openProfile = this.props.openProfile.bind(this);
         this.friendshipExists = this.props.friendshipExists.bind(this);
         this.addFriend = this.props.addFriend.bind(this);
+        this.displayMessages = this.props.displayMessages.bind(this);
         
     }
 
@@ -40,7 +41,7 @@ export default class Profile extends Component {
                     lastName: data['lastName'], 
                     profilePicture: data['profilePicture'], 
                     joinedDate: data['joinedDate'],
-                    header: <ProfileHeader addFriend={this.addFriend} id={userId} profilePicture={data['profilePicture']} firstName={data['firstName']} lastName={data['lastName']} joinedDate={data['joinedDate']} exists={exists}/>
+                    header: <ProfileHeader displayMessages={this.displayMessages} addFriend={this.addFriend} id={userId} profilePicture={data['profilePicture']} firstName={data['firstName']} lastName={data['lastName']} joinedDate={data['joinedDate']} exists={exists}/>
                 })
                 console.log(data)
             })
@@ -49,27 +50,34 @@ export default class Profile extends Component {
 
     getFriends = async (event) => {
         event.preventDefault()
-        let {userId, firstName, lastName, token} = this.state
+        let {userId, firstName, lastName, token, display} = this.state
         let that = this
 
-        await fetch("http://localhost:9000/friendships/getAll?id="+userId).then(res => {
-          res.json().then(data => {
-            //   console.log(data['data'])
-            //   console.log(userId)
-              that.setState({display: <FriendsDisplay 
-                friends={data['data']} firstName={firstName}
-                lastName={lastName}
-                id={userId}
-                token={token}
-                header={null}
-                openProfile={that.openProfile}
-                type="profile"
-                friendshipExists={this.friendshipExists}
-                addFriend={this.addFriend}
-                
-                />})
-          })  
-        })
+        if (display == null) {
+            await fetch("http://localhost:9000/friendships/getAll?id="+userId).then(res => {
+                res.json().then(data => {
+                  //   console.log(data['data'])
+                  //   console.log(userId)
+                    that.setState({display: <FriendsDisplay 
+                      friends={data['data']} firstName={firstName}
+                      lastName={lastName}
+                      id={userId}
+                      token={token}
+                      header={null}
+                      openProfile={that.openProfile}
+                      type="profile"
+                      friendshipExists={this.friendshipExists}
+                      addFriend={this.addFriend}
+                      
+                      />})
+                })  
+              })
+        }
+        else {
+            this.setState({display: null})
+        }
+
+
 
     }
 

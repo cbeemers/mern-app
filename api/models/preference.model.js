@@ -10,7 +10,7 @@ const preferenceSchema = new SCHEMA ({
         unique: true,
     },
     preferences : {
-        type: Object,
+        type: Array,
         required: true,
     }
 })

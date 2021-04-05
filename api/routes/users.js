@@ -153,7 +153,7 @@ router.route('/getUser').get(async (req, res) => {
 
     User.findOne({_id}, function(err, user) {
         if (user) {
-            res.status(200).json({firstName: user['firstName'], lastName: user['lastName'], profilePicture: user['profilePicture']})
+            res.status(200).json({firstName: user['firstName'], lastName: user['lastName'], profilePicture: user['profilePicture'], joinedDate: user['createdAt']})
         }
     })
 })
@@ -205,20 +205,22 @@ router.route('/sendRequest').post(async (req, res) => {
         }
         else {
             let values = user['requests']
-            if (_id != sender_id) {
-                values.push({
-                    _id: sender_id,
-                    firstName: senderFirst,
-                    lastName: senderLast,
-                    profilePicture: json['profilePicture']
-                })
-                //     {
-                //     firstName: firstName, 
-                //     lastName: lastName,
-                //     _id: sender_id,
-                // })
-                await User.updateOne({_id: _id}, {$set:{requests: values}});
-                res.status(200).json({msg: "Success"});
+            if (_id != sender_id) { 
+                if (!values.some(request => request._id === sender_id)) {
+                    values.push({
+                        _id: sender_id,
+                        firstName: senderFirst,
+                        lastName: senderLast,
+                        profilePicture: json['profilePicture']
+                    })
+
+                    await User.updateOne({_id: _id}, {$set:{requests: values}});
+                    res.status(200).json({msg: "Success"});
+                }
+                else {
+                    res.status(400).json({msg: "Request already exists."})
+                }
+
             }
             else {
                 res.status(400).json({msg: "Request already exists."})

@@ -34,13 +34,13 @@ export default class FriendsController extends Component {
             displayComponent,
             profileId: "",
             exists: true, // If friendship already exists
-
         }
+
+        this.displayMessages = this.props.displayMessages.bind()
     }
 
     openProfile = async (id, event) => {
-        // let id = event.target.id
-        console.log(event.target.title)
+
         if (event.target.title == ""){
             let {stack, _id} = this.state
             let exists = await this.friendshipExists(id)
@@ -52,7 +52,7 @@ export default class FriendsController extends Component {
                     // console.log("yo")
                     // return
                 }
-                let displayComponent = (<Profile addFriend={this.addFriend} friendshipExists={this.friendshipExists} userId={id} openProfile={this.openProfile} exists={exists} />)
+                let displayComponent = (<Profile displayMessages={this.displayMessages} addFriend={this.addFriend} friendshipExists={this.friendshipExists} userId={id} openProfile={this.openProfile} exists={exists} />)
                 stack.enqueue(displayComponent)
                 await this.setState({displayComponent, stack, profileId: id, exists})
                 
@@ -69,24 +69,19 @@ export default class FriendsController extends Component {
         }).then(res => {
             if (res.status === 200) {
                 exists = true;
-                console.log("yo")
             }
-        })
-        console.log("should be second")
+        }); 
+
         return exists;
     }
 
     displayStackNav = () => {
-        let {profileId, _id, exists} = this.state
-        // let exists = await this.friendshipExists(profileId)
 
         if (this.state.stack.index >= 1) {
-            // let addButton = (<button style={{float: "right", borderRadius: "10%"}} onClick={(e) => this.addFriend(profileId, e)}>Add Friend</button>)
 
             return (
                 <div style={{height: "2em", width: "100%", backgroundColor: "#192635", padding: "1em"}}>
                     <img onClick={this.backPage} style={{height: "2em", width: "2em", borderRadius: "10%"}} src="./img/backArrow.png"/>
-                    {/* {!exists && _id != profileId && addButton} */}
                 </div>
             )
         }

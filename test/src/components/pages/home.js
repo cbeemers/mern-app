@@ -9,6 +9,7 @@ import Weather from '../pages/weather'
 import Stock from '../pages/stocks'
 import Signup from '../account/signup'
 // import { profileContent } from '../layout/style'; 
+import MessageDisplay from '../account/layout/messages'
 import FriendsController from '../controllers/friends-controller'
 
 // import background from '/background.php';
@@ -78,8 +79,19 @@ export default class Home extends Component{
         }
     }
 
-    displayMessages = async () => {
-        console.log("messages")
+    displayMessages = async (user = undefined) => {
+        // console.log("messages")
+        let {token, userId, display} = this.state
+        let id = user['id']
+
+        if (display.type == (<MessageDisplay />).type) {
+            await this.setState({display: null})
+        }
+
+        if (id != userId && user != undefined) {
+            await this.setState({display: <MessageDisplay userId={userId} token={token} sendTo={id} firstName={user['firstName']} lastName={user['lastName']} profilePicture={user['profilePicture']} />})
+        }
+        
     }
 
     displayRequests = async () => {
@@ -116,7 +128,7 @@ export default class Home extends Component{
                 }).then((res) => {
                     res.json().then(data => {
                         that.setState({
-                            display: <FriendsController display="friends" token={token} friends={data['data']} id={userId} firstName={user} lastName={userLast} query="" />,
+                            display: <FriendsController displayMessages={this.displayMessages} display="friends" token={token} friends={data['data']} id={userId} firstName={user} lastName={userLast} query="" />,
                             friendData: data,
                         })
                     })
@@ -126,7 +138,7 @@ export default class Home extends Component{
         else {
             let {friendData} = this.state
             await this.setState({display: null})
-            await this.setState({display: <FriendsController display="friends" token={token} friends={friendData['data']} id={userId} firstName={user} lastName={userLast} query="" />
+            await this.setState({display: <FriendsController displayMessages={this.displayMessages} display="friends" token={token} friends={friendData['data']} id={userId} firstName={user} lastName={userLast} query="" />
             })
         }
 

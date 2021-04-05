@@ -24,7 +24,7 @@ var usersRouter = require('./routes/users');
 var weatherRouter = require('./routes/weather');
 var stockRouter = require('./routes/stock');
 var friendshipRouter = require('./routes/friendships');
-var preferenceRouter = require('./routes/preferences');
+var preferenceRouter = require('./routes/preferences'); 
 // var withAuth = require('./routes/middleware')
 
 

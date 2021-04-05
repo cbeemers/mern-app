@@ -20,6 +20,7 @@ export default class ProfileHeader extends Component {
         }
 
         this.addFriend = this.props.addFriend.bind(this);
+        this.displayMessages = this.props.displayMessages.bind(this);
     }
 
     render() {
@@ -39,10 +40,10 @@ export default class ProfileHeader extends Component {
                             </div>
 
                         </div>
-                </div>
-                <div style={{ float:"right"}}>
-                    <img style={message} src='./img/msg.png'/>
-                    {!exists && addButton}
+                    <div style={{float:"right"}}>
+                        <img onClick={e => {this.displayMessages({id, profilePicture, firstName, lastName})}} style={message} src='./img/msg.png'/>
+                        {!exists && addButton}
+                    </div>
                 </div>
                 
             </header>
@@ -50,11 +51,9 @@ export default class ProfileHeader extends Component {
     }
 }
 let message = {
-    maxHeight: "2em",
-    // backgroundImage: "url('./img/msg.png')",
-    maxWidth: "2em",
+    maxHeight: "3em",
+    maxWidth: "3em",
     borderRadius: "10%",
-    // float: "right",
     marginRight: "1em"
 
 }
