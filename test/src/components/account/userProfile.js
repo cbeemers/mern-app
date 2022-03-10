@@ -1,11 +1,9 @@
 import React, {Component} from 'react';
 import { Link } from 'react-router-dom';
-import {getCookie} from '../cookie';
+import {getCookie, checkToken} from '../cookie';
 
 import Header from '../layout/Header';
 import {account, profileContent} from '../layout/style';
-
-// import ReactFileReader from 'react-file-reader'
 
 export default class Profile extends Component {
     constructor(props) {
@@ -26,7 +24,6 @@ export default class Profile extends Component {
             token: getCookie('token'),
             _id: "",
             profilePicture: "",
-
         }
     }
 
@@ -43,36 +40,31 @@ export default class Profile extends Component {
 
         if (token !== "") {
             let that = this;
-
-            fetch("http://localhost:9000/users/getFromUser?type=all&token="+token, {
-            method: "GET",
-            headers: {
-                'Content-Type': 'application/json',
-            }
-            }).then((res) => {
-                res.json().then((data) => {
-                    let firstName = String(data['firstName'])[0].toUpperCase() + String(data['firstName']).slice(1)
-                    let lastName = String(data['lastName'])[0].toUpperCase() + String(data['lastName']).slice(1)
-                    
-                    that.setState({
-                        stocks: data["stocks"],
-                        user: data['email'],
-                        cities: data["locations"],
-                        joined: data['createdAt'],
-                        friends: data['friends'],
-                        name: firstName  + " " + lastName,
-                        _id: data['_id'],
-                        profilePicture: data['profilePicture']
-                    });
-                });
-            });
+            checkToken(token).then(userId => {
+                console.log(userId)
+                fetch("http://localhost:9000/profiles/getProfile?userId="+userId, {
+                    method: "GET",
+                    "Content-Type": "application/json",
+                }).then(res => {
+                    res.json().then(data => {
+                        console.log(data)
+                        that.setState({
+                            firstName: data['firstName'],
+                            lastName: data['lastName'], 
+                            profilePicture: data['profilePicture'], 
+                            joined: data['createdAt'],
+                            stocks: data['stocks'],
+                            cities: data['locations'],
+                            _id: userId,
+                        })
+                    })
+                })
+            });       
         }
-        
     }
 
     createDisplay = (type) => {
         let display = this.state[type].map((object, index) => {
-            // if (type == )
             return (
             <div style={displayed}><h3 >{object}</h3></div>
             )
@@ -117,7 +109,7 @@ export default class Profile extends Component {
             fileData.append('image', fileObject, fileObject.name);
             fileData.enctype = "multipart/form-data"
 
-            await fetch('http://localhost:9000/users/addProfilePicture?_id=' + _id, {
+            await fetch('http://localhost:9000/profiles/updateProfilePicture?userId=' + _id, {
                 method: "POST",
                 body: fileData
             }).then((res) => {
@@ -131,7 +123,7 @@ export default class Profile extends Component {
 
 
     render() {
-        let {user, joined, displayS, displayC, name, fileSelector, profilePicture} = this.state;
+        let {user, joined, displayS, displayC, firstName, lastName, fileSelector, profilePicture} = this.state;
         let date = new Date(joined)
         
         joined = (date.getMonth()+1) + "/" + date.getDate() + "/" + date.getFullYear()
@@ -144,7 +136,7 @@ export default class Profile extends Component {
                     <div style={{textAlign: "center", marginTop: "4em"}}>
                         <div onClick={this.changePicture}><p style={{margin: "0"}}><img style={{boxShadow: "0em 1em 1em 1em black"}} className="profile-picture" src={profilePicture} /></p></div>
                         <br></br>
-                        <h2>{name}</h2>
+                        <h2>{firstName} {lastName}</h2>
                         <p style={{padding: "1em"}}>allow for a bio to be displayed when another user clicks on their profile.</p>
                     </div>
                     <div style={{textAlign: "center", marginTop: "2em"}}>Date Joined: {joined}</div>

@@ -18,44 +18,6 @@ const userSchema = new SCHEMA ({
         required: true,
         minlength: 6
     },
-    stocks: {
-      type: Array,
-      required: false,
-    }, 
-    locations: {
-      type: Array,
-      required: false,
-    }, 
-    messages: {
-      type: Array, 
-      required: true
-    }, 
-    firstName: {
-      type: String,
-      required: true
-    },
-    lastName: {
-      type: String,
-      required: true
-    },
-    requests: {
-      type: Array,
-      required: true
-    }, 
-    fullName: {
-      type: String, 
-      required: true,
-      index: true,
-    },
-    bio: {
-      type: String,
-      required: false,
-    },
-    profilePicture: {
-      type: String,
-      required: false,
-      default: "https://my-user-pictures.s3.us-east-2.amazonaws.com/profile-default.png"
-    }
     // picture {
     //   type:  
     // }

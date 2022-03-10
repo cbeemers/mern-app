@@ -63,9 +63,9 @@ export default class Signup extends React.Component {
 
                 }).then(res => {
                     if (res.status == 200) {
+                        console.log(res)
                         window.location.reload(true);
                     } else if (res.status === 401) {
-                        console.log(res)
                         this.setState({
                             message: "Email already in use!"
                         });

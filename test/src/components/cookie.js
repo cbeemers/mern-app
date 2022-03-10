@@ -16,3 +16,17 @@ export function getCookie(cookie) {
     }
     return "";
 }
+
+export async function checkToken(token) {
+    let id;
+    await fetch("http://localhost:9000/checkToken?token="+token, {
+        method: 'GET',
+    }).then(async (res) => {
+        if (res.status == 200) {
+            await res.json().then(data => {
+                id = data['id']
+            })
+        }
+    });
+    return id;
+}

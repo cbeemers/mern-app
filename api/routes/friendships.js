@@ -1,14 +1,9 @@
 const router = require('express').Router();
-const { json } = require('body-parser');
-const jwt = require('jsonwebtoken');
 const fetch = require('node-fetch');
-const mailer = require('nodemailer')
 
 let Friendship = require('../models/friendship.model.js');
-// let User = require('../models/user.model');
 
 require('dotenv').config();
-const secret = process.env.SECRET;
 
 router.route('/').get( async (req, res) => {
     await Friendship.findOne({_id: "604fe9499e4ec0401ce5cc34"}, function(err, friendship) {
@@ -33,32 +28,34 @@ async function getProfilePicture(id) {
 }
 
 router.route('/add').post(async (req, res) => {
-    let {sender_id, added_id, added_first, added_last, sender_first, sender_last} = req.query;
-    let {userPicture} = req.body
+    let {sender_id, user_id, user_first, user_last, sender_first, sender_last} = req.query;
+    // let {userPicture} = req.body
 
-    await getProfilePicture(added_id).then(async (addingPicture) => {
-        if (addingPicture) {
+    // await getProfilePicture(added_id).then(async (addingPicture) => {
+    //     if (addingPicture) {
             let newFriendship = new Friendship ({friendship: [
                 {
                     id: sender_id,
                     firstName: sender_first,
                     lastName: sender_last,
-                    profilePicture: userPicture
+                    // profilePicture: userPicture
                 },
                 {
-                    id: added_id,
-                    firstName: added_first,
-                    lastName: added_last,
-                    profilePicture: addingPicture
+                    id: user_id,
+                    firstName: user_first,
+                    lastName: user_last,
+                    // profilePicture: addingPicture
                 }
             
             ]})
             
-            await newFriendship.save()
-            res.status(200).json({msg: "Friend added!"})
-        }
+            newFriendship.save().then(() => {
+                res.status(200).json({msg: "Friend added!"});
+            });
+            
+        // }
 
-    })
+    // })
     
 
 
@@ -87,10 +84,10 @@ router.route('/remove').post(async (req, res) => {
 
 
 router.route('/exists').get(async (req, res) => {
-    let {senderId, addedId} = req.query
+    let {senderId, userId} = req.query
     await Friendship.findOne( {friendship: {$all: [
         {$elemMatch: {"id": senderId}},
-        {$elemMatch: {"id": addedId}}
+        {$elemMatch: {"id": userId}}
     ]}}, 
     function(err, found) {
         if (found) {

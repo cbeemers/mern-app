@@ -11,7 +11,7 @@ export default class RequestsDisplay extends Component {
         super(props)
 
         this.state = {
-            requests: props.requests,
+            requests: [],
             token: props.token,
             userFirst: props.userFirst,
             userLast: props.userLast,
@@ -20,11 +20,35 @@ export default class RequestsDisplay extends Component {
         }
     }
 
+    componentDidMount() {
+        this.getRequests();
+    }
+
+    getRequests = async () => {
+        let {userId} = this.state;
+        let that = this;
+
+        await fetch("http://localhost:9000/friend-requests/getRequests?receiverId="+userId, {
+            method: "GET",
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        }).then(async (res) => {
+            await res.json().then(data => {
+                console.log(data)
+                that.setState({
+                    requests: data
+                })
+            })
+        })
+    }
+
     display = () => {
         if (this.state.requests.length > 0) {
             return this.state.requests.map((result, index) => {
                 let fullName = result["firstName"] + " " + result["lastName"]
                 let que = result["firstName"] + "-" + result["lastName"] + "-" + result['profilePicture']
+                let id = result['_id']
                 return (
                     <div style={content}>
                     <div style={{display: "flex"}}>
@@ -32,8 +56,8 @@ export default class RequestsDisplay extends Component {
                     <h3 style={{padding: "1em", marginTop:"auto", marginBottom: "auto"}}>{fullName}</h3>
                     </div>
                     <div style={cluster}>
-                    <button style={drop, {backgroundImage: "none"}} name="accept" value={que} id={result['_id']} onClick={this.respond}>Accept</button>
-                    <button style={drop, {backgroundImage: "none"}} name="decline" value={que} id={result['_id']} onClick={this.respond}>Decline</button>
+                    <button style={drop, {backgroundImage: "none"}} name="accept" value={que} requestId={id} senderId={result['senderId']} onClick={() => this.respond("accept", result['_id'], result['senderId'], que)}>Accept</button>
+                    <button style={drop, {backgroundImage: "none"}} name="decline" value={que} requestId={id}  onClick={() => this.respond("decline", result['_id'], result['senderId'], que)}>Decline</button>
                     </div>
                     
                     </div>
@@ -46,22 +70,15 @@ export default class RequestsDisplay extends Component {
         }
     }
 
-    respond = async (event) => {
-        let {userPicture} = this.state
+    respond = async (action, requestId, senderId, value) => {
+        let {userId, userFirst, userLast} = this.state
 
-        let _id = event.target.id
-        let split = event.target.value.split('-')
+        let split = value.split('-')
         let first = split[0]
         let last = split[1]
 
-        let {userId, userFirst, userLast} = this.state
-        let action = event.target.name
-        console.log(first, last)
-        // await fetch("h")
-        console.log(userPicture)
-
         if (action == "accept") {
-            await fetch("http://localhost:9000/friendships/exists?senderId="+userId+"&addedId="+_id, {
+            await fetch("http://localhost:9000/friendships/exists?senderId="+senderId+"&userId="+userId, {
                 method: "GET", 
                 headers: {
                     'Content-Type': 'application/json'
@@ -70,49 +87,31 @@ export default class RequestsDisplay extends Component {
             }).then(res => {
                 res.json().then(async data => {
                     if (data['result'] != "found") {
-                        console.log(data['result'])
-                        await fetch("http://localhost:9000/friendships/add?added_id="+_id+"&added_first="+first+"&added_last="+last+"&sender_id="+userId+"&sender_first="+userFirst+"&sender_last="+userLast, {
+                        await fetch("http://localhost:9000/friendships/add?sender_id="+senderId+"&sender_first="+first+"&sender_last="+last+"&user_id="+userId+"&user_first="+userFirst+"&user_last="+userLast, {
                             method: "POST",
                             headers: {
                                 'Content-Type': 'application/json',
                             },
-                            body: JSON.stringify({userPicture})
-                        })
-                        // .then((res) => {
-                        //     res.json().then(data => {
-                        //         console.log(data)
-                        //     })
-                        // })
+                        });
                     }
                 })
             })
         }
 
-        this.removeRequest(_id)
+        this.removeRequest(requestId)
     }
 
     removeRequest = async (id) => {
-        let {userId, token} = this.state
         let that = this
 
-        await fetch("http://localhost:9000/users/deleteRequest?sendId="+id+"&_id="+userId+"&token="+token, {
+        await fetch("http://localhost:9000/friend-requests/deleteRequest", {
             method: "POST",
             headers: {
                 'Content-Type': 'application/json',
-            }
-        })
-
-        await fetch("http://localhost:9000/users/getFromUser?type=requests&token="+token, {
-            method: "GET",
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        }).then((res) => {
-            res.json().then(data => {
-                that.setState({
-                    requests: data['values']
-                })
-            })
+            },
+            body: JSON.stringify({id})
+        }).then(res => {
+            that.getRequests();
         })
     }
 

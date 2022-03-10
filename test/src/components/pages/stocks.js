@@ -9,9 +9,10 @@ import StockWidget from '../widgets/stock.widet';
 import StockGraph from '../widgets/graph.widget';
 import CalendarWidget from '../widgets/calendar.widget';
 import Pagination from '../layout/pagination';
-import {getCookie} from '../cookie';
+import { getCookie, checkToken } from '../cookie';
 
 import {account, search, msg, calendar} from '../layout/style';
+import { addColorSet } from '../widgets/canvasjs-2.3.2/canvasjs.min';
 
 export default class Stock extends Component {
     constructor(props) {
@@ -40,12 +41,6 @@ export default class Stock extends Component {
             <CalendarWidget year={year} date={month + " " + day + " " + year} changeDate={this.changeDate} pagination={pagination} />
         );
 
-        let favorites = []
-        // console.log(props.favorites)
-        if (props.favorites !== undefined) {
-            favorites = props.favorites
-        }
-
         this.state = {
             message: "",
             query: "",
@@ -61,13 +56,30 @@ export default class Stock extends Component {
             graphButtons: null,
             graph: null,
             addFavorite: null,
-            favorites: favorites,
-            token: getCookie('token'),
-            graphType: null
+            favorites: props.favorites,
+            graphType: null,
+            userId: props.userId,
         }
-        
-        // if (this.state.token != "") {
-        //     this.getFavorites();
+    }
+
+    componentDidMount() {
+        // let token = getCookie('token');
+        // let that = this;
+        // if (token) {
+        //     checkToken(token).then(async userId => {
+        //         await fetch("http://localhost:9000/profiles/getStocks?userId="+userId, {
+        //             method: "GET"
+        //         }).then(async res => {
+        //             await res.json().then(favorites => {
+        //                 that.setState({
+        //                     userId,
+        //                     favorites
+        //                 });
+        //             });
+        //         });
+        //     });
+        // } else {
+        //     this.setState({userId: null})
         // }
     }
 
@@ -91,7 +103,7 @@ export default class Stock extends Component {
     }
 
     search = async () => {
-        let {query, date, json, token} = this.state
+        let {query, date, json, userId} = this.state
         if (json == null) {
             const uri = 'http://localhost:9000/stock?symbol='+query;
             const response = await fetch(uri);
@@ -116,7 +128,7 @@ export default class Stock extends Component {
         }
 
         let favorite = null;
-        if (token != "") {
+        if (userId != "") {
             favorite = <button onClick={this.addFavorite} style={calendar}>Add Favorite</button>
         }
 
@@ -152,28 +164,28 @@ export default class Stock extends Component {
             graph: <StockGraph year={year} json={json} stock={query} type={type} day={day} month={month} />,
             graphType: type
         });
-        // console.log(this.state.graph)
+
         this.drop();
     }
 
     addFavorite = async() => {
-        let {query} = this.state;
-        let cookie = getCookie('token');
-        // console.log(cookie, query)
+        let { query, userId } = this.state;
+        let that = this;
 
-        await fetch("http://localhost:9000/users/addToUser", {
+        await fetch("http://localhost:9000/profiles/addStock", {
             method: "POST", 
             body: JSON.stringify({
-                query: query,
-                token: cookie,
-                type: "stocks"
+                ticker: query,
+                userId, 
             }),
             headers: {
                 'Content-Type': 'application/json',
             }
 
-        }).then(res => {
-            console.log(res.json());
+        }).then(async res => {
+            await res.json().then(favorites => {
+                that.setState({favorites});
+            });
         });
 
         // await this.getFavorites();
@@ -258,7 +270,8 @@ export default class Stock extends Component {
     }
 
     createDropdown = () => {
-        if (getCookie("token")) {
+        let { userId } = this.state;
+        if (userId) {
             return (
                 <DropdownButton style={{marginTop:"1em"}} id="dropdown-item-button" title="Your Favorites">
                     {this.renderFavorites()}

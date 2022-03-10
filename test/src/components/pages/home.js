@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 
-import {getCookie} from '../cookie';
+import { getCookie, checkToken } from '../cookie';
 import Welcome from './welcome'
 // import FriendsDisplay from '../account/layout/friends'
 import RequestsDisplay from '../account/layout/requests'
@@ -21,14 +21,16 @@ export default class Home extends Component{
         // let user = '';
 
         this.state = {
-            user: "",
             display: <Welcome />,
             token: getCookie('token'),
-            userLast: "",
+            firstName: "",
+            lastName: "",
             userId: "",
             profilePicture: "",
             preferences: null,
             friendData: null,
+            stocks: [],
+            locations: [],
         }
 
         this.signup = this.signup.bind(this)
@@ -40,33 +42,54 @@ export default class Home extends Component{
         if (token != "") {
             let that = this;
             
-            fetch("http://localhost:9000/users/getFromUser?type=all&token="+token, {
-                method: 'GET',
-                query: token
-            }).then(res => {
-                if (res.status === 200) {
-                    
-                    res.json().then(data => {
-                        // console.log(data);
-                        user = String(data['firstName'])[0].toUpperCase() + String(data['firstName']).slice(1);
-                        let userLast = String(data['lastName'])
-                        let userId = String(data['_id'])
-                        console.log(userId)
-                        that.setState({user:user, display: <Welcome user={user} token={token} userId={userId} />, userLast: userLast, userId: userId, profilePicture: data['profilePicture']});
-                        // that.setState({user:user, display: <Counter count={111}/>, userLast: userLast, userId: userId});
-                        fetch("http://localhost:9000/preferences/getAll?id="+userId, {method: "GET"}).then(response => {
-                            if (response.status === 200) {
-                                response.json().then(prefData => {
-                                    console.log(prefData)
-                                    that.setState(prefData)
-                                })
-                                
-                            } 
-                        })
-                    })
-        
-                }
+            checkToken(token).then(async userId => {
+
+                await fetch("http://localhost:9000/profiles/getProfile?userId="+userId, {
+                    method: "GET",
+                }).then(async res => {
+                    await res.json().then(async profile => {
+                        console.log(profile);
+                        that.setState({
+                            userId,
+                            stocks: profile['stocks'],
+                            profilePicture: profile['profilePicture'],
+                            locations: profile['locations'],
+                            firstName: profile['firstName'],
+                            lastName: profile['lastName'],
+
+                        });
+                    });
+                });
             });
+
+            //     await fetch("http://localhost:9000/users/getFromUser?type=all&token="+token, {
+            //         method: 'GET',
+            //         query: token
+            //     }).then(res => {
+            //         if (res.status === 200) {
+            //             console.log(userId)
+                        
+            //             res.json().then(data => {
+            //                 // console.log(data);
+            //                 user = String(data['firstName'])[0].toUpperCase() + String(data['firstName']).slice(1);
+            //                 let userLast = String(data['lastName'])
+            //                 that.setState({user:userId, display: <Welcome userId={userId} token={token} userId={userId} />, userLast: userLast, userId: userId, profilePicture: data['profilePicture']});
+            //                 // that.setState({user:user, display: <Counter count={111}/>, userLast: userLast, userId: userId});
+            //                 fetch("http://localhost:9000/preferences/getAll?id="+userId, {method: "GET"}).then(response => {
+            //                     if (response.status === 200) {
+            //                         response.json().then(prefData => {
+            //                             console.log(prefData)
+            //                             that.setState(prefData)
+            //                         })
+                                    
+            //                     } 
+            //                 })
+            //             })
+            
+            //         }
+            //     });
+
+            // });
         }
         else {
             this.setState({display: <Login signup={this.signup}/>})
@@ -96,20 +119,24 @@ export default class Home extends Component{
 
     displayRequests = async () => {
         let {token, userLast, userId, user, profilePicture} = this.state;
-        let that = this
-
-        await fetch("http://localhost:9000/users/getFromUser?type=requests&token="+token, {
-            method: "GET",
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        }).then((res) => {
-            res.json().then(data => {
-                that.setState({
-                    display: <RequestsDisplay userPicture={profilePicture} token={token} requests={data['values']} userLast={userLast} userId={userId} userFirst={user}/>
-                })
-            })
+        // let that = this
+        this.setState({
+            display: <RequestsDisplay userPicture={profilePicture} token={token} userLast={userLast} userId={userId} userFirst={user}/>
         })
+
+        // await fetch("http://localhost:9000/friend-requests/getRequests?receiverId="+userId, {
+        //     method: "GET",
+        //     headers: {
+        //         'Content-Type': 'application/json',
+        //     }
+        // }).then(async (res) => {
+        //     await res.json().then(data => {
+        //         console.log(data)
+        //         that.setState({
+        //             display: <RequestsDisplay userPicture={profilePicture} token={token} requests={data} userLast={userLast} userId={userId} userFirst={user}/>
+        //         })
+        //     })
+        // })
 
     }
 
@@ -128,7 +155,7 @@ export default class Home extends Component{
                 }).then((res) => {
                     res.json().then(data => {
                         that.setState({
-                            display: <FriendsController displayMessages={this.displayMessages} display="friends" token={token} friends={data['data']} id={userId} firstName={user} lastName={userLast} query="" />,
+                            display: <FriendsController displayMessages={this.displayMessages} display="friends" userId={userId} token={token} friends={data['data']} firstName={user} lastName={userLast} query="" />,
                             friendData: data,
                         })
                     })
@@ -138,7 +165,7 @@ export default class Home extends Component{
         else {
             let {friendData} = this.state
             await this.setState({display: null})
-            await this.setState({display: <FriendsController displayMessages={this.displayMessages} display="friends" token={token} friends={friendData['data']} id={userId} firstName={user} lastName={userLast} query="" />
+            await this.setState({display: <FriendsController displayMessages={this.displayMessages} display="friends" userId={userId} friends={friendData['data']} id={userId} firstName={user} lastName={userLast} query="" />
             })
         }
 
@@ -146,21 +173,12 @@ export default class Home extends Component{
 
     displayStocks = async () => {
 
-        let {token} = this.state;
+        let { token, stocks, userId } = this.state;
         let type = "stocks";
         let that = this;
 
         if (token != "") {
-            await fetch("http://localhost:9000/users/getFromUser?type="+type+"&token="+token, {
-                method: "GET",
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            }).then((res) => {
-                res.json().then((data) => {
-                    that.setState({display: <Stock favorites={data['values']} />});
-                });
-            });
+            this.setState({display: <Stock favorites={stocks} userId={userId} />})
         } 
         else {
             this.setState({display: <Stock />})
@@ -189,7 +207,7 @@ export default class Home extends Component{
 
     display = () => {
         
-        let {user, display} = this.state
+        let {userId, locations, stocks, display} = this.state
         
 
         // if (user != "") {
@@ -204,8 +222,8 @@ export default class Home extends Component{
                 
                 <aside className="aside2" >
                     <div style={aside2}>
-                        <div className="home-button" onClick={() => {this.setState({display:<Weather />})}}><h3>Weather</h3></div>
-                        <div className="home-button" onClick={this.displayStocks}><h3>Stocks</h3></div>
+                        <div className="home-button" onClick={() => {this.setState({display:<Weather userId={userId} favorites={locations} />})}}><h3>Weather</h3></div>
+                        <div className="home-button" onClick={() => this.setState({display: <Stock favorites={stocks} userId={userId} />})}><h3>Stocks</h3></div>
                         {/* <div className="home-button"><h3>main</h3></div> */}
                         
                     </div>

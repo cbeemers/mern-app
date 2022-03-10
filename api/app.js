@@ -25,9 +25,9 @@ var weatherRouter = require('./routes/weather');
 var stockRouter = require('./routes/stock');
 var friendshipRouter = require('./routes/friendships');
 var preferenceRouter = require('./routes/preferences'); 
+var profileRouter = require('./routes/profiles');
+var requestRouter = require('./routes/friend-requests')
 // var withAuth = require('./routes/middleware')
-
-
 
 var app = express();
 const uri = process.env.ATLAS_URI;
@@ -67,7 +67,9 @@ app.use('/users', usersRouter);
 app.use('/friendships', friendshipRouter);
 app.use('/weather', weatherRouter, cors());
 app.use('/stock', stockRouter);
-app.use('/preferences', preferenceRouter)
+app.use('/preferences', preferenceRouter);
+app.use('/profiles', profileRouter);
+app.use('/friend-requests', requestRouter);
 app.get('/checkToken', (req, res) => {
 
   const token = req.query.token;

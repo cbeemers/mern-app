@@ -2,6 +2,7 @@ import React, {Component} from 'react'
 
 import ProfileHeader from '../../layout/profileHeader'
 import FriendsDisplay from '../layout/friends'
+import { checkToken, getCookie } from '../../cookie'
 
 export default class Profile extends Component {
     constructor(props) {
@@ -31,21 +32,37 @@ export default class Profile extends Component {
         let that = this
         // console.log(userId)
 
-        fetch("http://localhost:9000/users/getUser?_id="+userId, {
-            method: "GET",
-            'Content-Type': 'application/json'
-        }).then(res => {
-            res.json().then(data => {
-                that.setState({
-                    firstName: data['firstName'], 
-                    lastName: data['lastName'], 
-                    profilePicture: data['profilePicture'], 
-                    joinedDate: data['joinedDate'],
-                    header: <ProfileHeader displayMessages={this.displayMessages} addFriend={this.addFriend} id={userId} profilePicture={data['profilePicture']} firstName={data['firstName']} lastName={data['lastName']} joinedDate={data['joinedDate']} exists={exists}/>
-                })
-                console.log(data)
-            })
-        })
+        // fetch("http://localhost:9000/profiles/getUser?_id="+userId, {
+        //     method: "GET",
+        //     'Content-Type': 'application/json'
+        // }).then(res => {
+        //     res.json().then(data => {
+        //         that.setState({
+        //             firstName: data['firstName'], 
+        //             lastName: data['lastName'], 
+        //             profilePicture: data['profilePicture'], 
+        //             joinedDate: data['joinedDate'],
+        //             header: <ProfileHeader displayMessages={this.displayMessages} addFriend={this.addFriend} id={userId} profilePicture={data['profilePicture']} firstName={data['firstName']} lastName={data['lastName']} joinedDate={data['joinedDate']} exists={exists}/>
+        //         })
+        //         console.log(data)
+        //     })
+        // })
+
+        // fetch("http://localhost:9000/profiles/getProfile", {
+        //     method: "GET",
+        //     "Content-Type": "application/json",
+        //     body: {userId}
+        // }).then(res => {
+        //     res.json().then(data => {
+        //         that.setState({
+        //             firstName: data['firstName'],
+        //             lastName: data['lastName'], 
+        //             profilePicture: data['profilePicture'], 
+        //             joinedDate: data['joinedDate'],
+        //             header: <ProfileHeader displayMessages={this.displayMessages} addFriend={this.addFriend} id={userId} profilePicture={data['profilePicture']} firstName={data['firstName']} lastName={data['lastName']} joinedDate={data['joinedDate']} exists={exists}/>
+        //         })
+        //     })
+        // })
     }
 
     getFriends = async (event) => {

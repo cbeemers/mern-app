@@ -21,55 +21,33 @@ export default class Weather extends Component {
             weatherWidget: null,
             message: "",
             addFavorite: null,
-            favorites: [],
+            favorites: props.favorites,
+            userId: props.userId
         }
         this.count = 0;
     }
 
-    componentDidMount() {
-        this.getFavorites();
-    }
-
-    getFavorites = async() => {
-        let token = getCookie('token');
-        let type = "locations";
+    addFavorite = async () => {
+        let { query, userId } = this.state;
+        console.log(userId)
         let that = this;
 
-        await fetch("http://localhost:9000/users/getFromUser?type="+type+"&token="+token, {
-            method: "GET",
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        }).then(res => {
-            // console.log(res.json());
-            res.json().then(data => {
-                // that.setState({favorites: data['values']});
-                that.setState({favorites: data['values']});
-                // console.log(data['values']);
-            });
-        });
-    }
-
-    addFavorite = async () => {
-        let {query} = this.state;
-        let cookie = getCookie('token');
-
-        await fetch("http://localhost:9000/users/addToUser", {
+        await fetch("http://localhost:9000/profiles/addLocation", {
             method: "POST", 
             body: JSON.stringify({
-                query: query,
-                token: cookie,
-                type: "locations"
+                location: query,
+                userId: userId,
             }),
             headers: {
                 'Content-Type': 'application/json',
             }
 
-        }).then(res => {
-            console.log(res.json());
+        }).then(async res => {
+            await res.json().then(async favorites => {
+                that.setState({favorites});
+            });
         });
 
-        await this.getFavorites();
         await this.createDropdown();
     }
 
@@ -102,7 +80,6 @@ export default class Weather extends Component {
             });
 
             this.search(city, state);
-            // console.log(this.getFavorites());
 
         } catch(TypeError) {
             this.setState({

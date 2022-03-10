@@ -11,7 +11,7 @@ export default class FriendsController extends Component {
         let displayComponent = (<FriendsDisplay 
             token={props.token}
             friends={props.friends}
-            id={props.id}
+            id={props.userId}
             firstName={props.firstName}
             lastName={props.lastName}
             query=""
@@ -28,12 +28,12 @@ export default class FriendsController extends Component {
             display: props.display,
             firstName: props.firstName,
             lastName: props.lastName, 
-            _id: props.id,
             token: props.token,
             stack: new Stack(displayComponent),
             displayComponent,
             profileId: "",
             exists: true, // If friendship already exists
+            userId: props.userId
         }
 
         this.displayMessages = this.props.displayMessages.bind()
@@ -42,7 +42,7 @@ export default class FriendsController extends Component {
     openProfile = async (id, event) => {
 
         if (event.target.title == ""){
-            let {stack, _id} = this.state
+            let {stack, userId} = this.state
             let exists = await this.friendshipExists(id)
     
             if (id) {
@@ -52,7 +52,7 @@ export default class FriendsController extends Component {
                     // console.log("yo")
                     // return
                 }
-                let displayComponent = (<Profile displayMessages={this.displayMessages} addFriend={this.addFriend} friendshipExists={this.friendshipExists} userId={id} openProfile={this.openProfile} exists={exists} />)
+                let displayComponent = (<Profile displayMessages={this.displayMessages} addFriend={this.addFriend} friendshipExists={this.friendshipExists} userId={userId} openProfile={this.openProfile} exists={exists} />)
                 stack.enqueue(displayComponent)
                 await this.setState({displayComponent, stack, profileId: id, exists})
                 
@@ -61,10 +61,10 @@ export default class FriendsController extends Component {
     }
 
     friendshipExists = async (otherId) => {
-        let {_id} = this.state;
+        let {userId} = this.state;
         let exists = false;
 
-        await fetch("http://localhost:9000/friendships/exists?senderId="+_id+"&addedId="+otherId, {
+        await fetch("http://localhost:9000/friendships/exists?senderId="+userId+"&addedId="+otherId, {
             method: "GET"
         }).then(res => {
             if (res.status === 200) {
@@ -90,11 +90,11 @@ export default class FriendsController extends Component {
 
     removeFriend = async (removedId, event) => {
         event.preventDefault()
-        const {_id, token, firstName, lastName} = this.state
+        const {userId, token, firstName, lastName} = this.state
         let that = this
         
         if (window.confirm("Remove friend?")) {
-            await fetch("http://localhost:9000/friendships/remove?senderId="+_id+"&removedId="+removedId, {
+            await fetch("http://localhost:9000/friendships/remove?senderId="+userId+"&removedId="+removedId, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -103,7 +103,7 @@ export default class FriendsController extends Component {
                     res.json().then(async (result) => {
                         console.log(result)
                         if (result['msg'] == "success") {
-                            await fetch("http://localhost:9000/friendships/getAll?id="+_id, {
+                            await fetch("http://localhost:9000/friendships/getAll?id="+userId, {
                                 method: "GET",
                                 headers: {
                                     'Content-Type': 'application/json',
@@ -114,7 +114,7 @@ export default class FriendsController extends Component {
                                     let displayComponent = (<FriendsDisplay 
                                         token={token}
                                         friends={data['data']}
-                                        id={_id}
+                                        id={userId}
                                         firstName={firstName}
                                         lastName={lastName}
                                         query=""
@@ -142,15 +142,19 @@ export default class FriendsController extends Component {
 
     addFriend = async (_id, event) => {
         // const _id = event.target.id
-        const {firstName, lastName, token} = this.state
+        const {firstName, lastName, userId} = this.state
 
-        await fetch("http://localhost:9000/users/sendRequest?_id="+_id+"&firstName="+firstName+"&lastName="+lastName+"&token="+token, {
+        await fetch("http://localhost:9000/friend-requests/sendRequest", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
-            }
-        }).then((res) =>{
-            res.json().then(data => {
+            },
+            body: JSON.stringify({
+                receiverId: _id, 
+                senderId: userId
+            })
+        }).then(async (res) =>{
+            await res.json().then(data => {
                 console.log(data)
             })
         })

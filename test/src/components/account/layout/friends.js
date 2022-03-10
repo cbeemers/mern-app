@@ -26,8 +26,6 @@ export default class FriendsDisplay extends Component {
             header,
             profileId: "",
             type: props.type
-            
-
         }
         
         // Open profile is function of the friends component controller
@@ -53,7 +51,7 @@ export default class FriendsDisplay extends Component {
             console.log(query)
         }
         // console.log(query)
-        await fetch("http://localhost:9000/users/findUser?userId="+_id+ "&fullName="+find, {
+        await fetch("http://localhost:9000/profiles/findProfile?userId="+_id+ "&fullName="+find, {
             method: "GET", 
             headers: {
                 'Content-Type': 'application/json'
