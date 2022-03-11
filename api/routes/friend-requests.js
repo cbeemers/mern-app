@@ -1,5 +1,7 @@
 const router = require('express').Router();
 const fetch = require('node-fetch');
+const mongoose = require('mongoose');
+mongoose.Promise = require('bluebird')
 
 require('dotenv').config();
 
@@ -8,28 +10,36 @@ const Profile = require('../models/profile.model');
 
 router.route('/getRequests').get(async (req, res) => {
     const { receiverId } = req.query;
-
-    FriendRequest.find({receiverId}, async function(err, requests) {
+    let userRequests;
+    FriendRequest.find({receiverId}).then( function(requests) {
+        userRequests = requests;
         if (!requests) {
             res.status(404).json([]);
         } else {
-            let result = []
-            for await (const request of requests) {
-                await Profile.findOne({userId: request['senderId']}, async function(err, profile) {
-                    if (profile) {
-                        result.push({
-                            firstName: profile['firstName'],
-                            lastName: profile['lastName'],
-                            profilePicture: profile['profilePicture'],
-                            _id: request['_id'],
-                            senderId: profile['userId'],
-                        });
-                    }
-                });
-            }
-            res.status(200).json(result);
+            let queries = [];
+            requests.forEach(request => {
+                queries.push(
+                    Profile.findOne({userId: request['senderId']})
+                );
+            });
+            return Promise.all(queries);
         }
-    });
+    }).then(profiles => {
+        let results = [];
+        for (let i = 0; i < profiles.length; i++){
+            let profile = profiles[i];
+            let request = userRequests[i];
+
+            results.push({
+                firstName: profile['firstName'],
+                lastName: profile['lastName'],
+                profilePicture: profile['profilePicture'],
+                _id: request['_id'],
+                senderId: profile['userId'],
+            });
+        }
+        res.status(200).json(results);
+    })
 
 });
 

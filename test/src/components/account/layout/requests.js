@@ -87,11 +87,19 @@ export default class RequestsDisplay extends Component {
             }).then(res => {
                 res.json().then(async data => {
                     if (data['result'] != "found") {
-                        await fetch("http://localhost:9000/friendships/add?sender_id="+senderId+"&sender_first="+first+"&sender_last="+last+"&user_id="+userId+"&user_first="+userFirst+"&user_last="+userLast, {
+                        await fetch("http://localhost:9000/friendships/add", {
                             method: "POST",
                             headers: {
                                 'Content-Type': 'application/json',
                             },
+                            body: JSON.stringify({
+                                sender_id: senderId,
+                                sender_first: first,
+                                sender_last: last,
+                                user_id: userId,
+                                user_first: userFirst,
+                                user_last: userLast
+                            })
                         });
                     }
                 })

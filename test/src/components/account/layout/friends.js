@@ -148,26 +148,20 @@ export default class FriendsDisplay extends Component {
         let {display, friends, _id, searchResults} = this.state
 
         if (display == "friends") {
-
-            return friends.map((friend, i) => {
+            return friends.map((friendship, i) => {
                 // friend = friend[0].toUpperCase() + friend.slice(1)
-                let friendship = friend['friendship']
+                // let friendship = friend['friendship']
 
                 // Index into friendship array for the non current user
-                let index = 0
-                // console.log(_id)
-                if (friendship[index]['id'] == _id) {
-                    index = 1
-                }
 
-                let name = friendship[index]["firstName"] + " " + friendship[index]["lastName"]
+                let name = friendship["firstName"] + " " + friendship["lastName"]
 
                 return (
-                <div onClick={(e) => this.openProfile(friendship[index]["id"], e)} style={content}>
+                <div onClick={(e) => this.openProfile(friendship, e)} style={content}>
                     <div style={{display:"flex"}}>
-                    <img className="profile-picture-else" src={friendship[index]["profilePicture"]} />
+                    <img className="profile-picture-else" src={friendship["profilePicture"]} />
                     <h3 style={{ color: "black", margin: "auto 0" , padding: "1em"}}>{name}</h3></div>
-                    {this.displayRemove(friendship[index]["id"])}
+                    {this.displayRemove(friendship["id"])}
                 </div>
                 )
             })

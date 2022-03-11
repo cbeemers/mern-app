@@ -10,13 +10,12 @@ export default class Profile extends Component {
 
         this.state = {
             userId: props.userId,
-            firstName: "",
-            lastName: "",
+            firstName: props.firstName,
+            lastName: props.lastName,
             joinedDate: "",
-            bio: "",
-            profilePicture: "",
+            bio: props.bio,
+            profilePicture: props.profilePicture,
             display: null,
-            header: null,
             exists: props.exists,
         }
 
@@ -76,11 +75,10 @@ export default class Profile extends Component {
                   //   console.log(data['data'])
                   //   console.log(userId)
                     that.setState({display: <FriendsDisplay 
-                      friends={data['data']} firstName={firstName}
+                      friends={data} firstName={firstName}
                       lastName={lastName}
                       id={userId}
                       token={token}
-                      header={null}
                       openProfile={that.openProfile}
                       type="profile"
                       friendshipExists={this.friendshipExists}
@@ -99,11 +97,19 @@ export default class Profile extends Component {
     }
 
     render() {
-        let {userId, display, profilePicture, firstName, lastName, joinedDate, header} = this.state
+        let {userId, display, profilePicture, firstName, lastName, bio, joinedDate} = this.state
+        console.log(firstName)
         return (
             <div>
-                {header}
-                <div onClick={this.getFriends} style={{margin: "auto 0", display: "flex", width: "100%", height: "4em", backgroundColor: "#192635", padding: "1em", alignItems: "center", justifyContent: "center"}}><h2 style={{padding: "1em"}}>Friends</h2><img style={{height: "2em", width: "2em", borderRadius: "10%"}} src="./img/arrow.png" /></div>
+                <div style={userInfo}>
+                    <img src={profilePicture} style={profilePictureStyle} />
+                    <h2>{firstName} {lastName}</h2>
+                    <p>{bio}</p>
+                    <div onClick={this.getFriends} style={friendsDropdown}>
+                        <h3 style={{padding: "1em"}}>Friends</h3>
+                        <img style={{height: "2em", width: "2em", borderRadius: "10%"}} src="./img/arrow.png" />
+                    </div>
+                </div>
                 {/* <div style={{margin: "auto", display: "flex", width: "100%", height: "4em", backgroundColor: "#192635"}}><h2 style={{padding: "1em"}}>{firstName} {lastName} Friends</h2><img style={{height: "2em", width: "2em"}} src="./img/arrow.png" /></div> */}
                 
             {display}
@@ -111,3 +117,32 @@ export default class Profile extends Component {
         )
     }
 }
+
+const friendsDropdown = {
+    margin: "auto 0", 
+    display: "flex", 
+    width: "100%", 
+    height: "4em", 
+    padding: "1em", 
+    alignItems: "center", 
+    justifyContent: "center"
+}
+
+const profilePictureStyle = {
+    height: '6em', 
+    width: '6em', 
+    borderRadius: '50%', 
+    padding: '.5em'
+}
+
+const userInfo = {
+    // margin: "auto 0", 
+    display: 'flex',
+    flexDirection: 'column',
+    backgroundColor: '#192635',
+    minHeight: '8em',
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: "center", 
+}
+

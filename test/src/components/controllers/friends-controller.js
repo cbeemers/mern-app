@@ -39,22 +39,19 @@ export default class FriendsController extends Component {
         this.displayMessages = this.props.displayMessages.bind()
     }
 
-    openProfile = async (id, event) => {
+    openProfile = async (friendship, event) => {
 
         if (event.target.title == ""){
             let {stack, userId} = this.state
-            let exists = await this.friendshipExists(id)
+            let exists = await this.friendshipExists(friendship['id'])
     
-            if (id) {
+            if (friendship['id']) {
                 if (this.state.displayComponent.type === (<Profile />).type) {
-                    // this.state.displayComponent.destroy()
                     await this.setState({displayComponent: null})
-                    // console.log("yo")
-                    // return
                 }
-                let displayComponent = (<Profile displayMessages={this.displayMessages} addFriend={this.addFriend} friendshipExists={this.friendshipExists} userId={userId} openProfile={this.openProfile} exists={exists} />)
+                let displayComponent = (<Profile bio={friendship['bio']} firstName={friendship['firstName']} lastName={friendship['lastName']} displayMessages={this.displayMessages} addFriend={this.addFriend} friendshipExists={this.friendshipExists} userId={friendship['id']} profilePicture={friendship['profilePicture']} openProfile={this.openProfile} exists={exists} />)
                 stack.enqueue(displayComponent)
-                await this.setState({displayComponent, stack, profileId: id, exists})
+                await this.setState({displayComponent, stack, profileId: friendship['id'], exists})
                 
             }
         }
@@ -113,7 +110,7 @@ export default class FriendsController extends Component {
                                     console.log(data)
                                     let displayComponent = (<FriendsDisplay 
                                         token={token}
-                                        friends={data['data']}
+                                        friends={data}
                                         id={userId}
                                         firstName={firstName}
                                         lastName={lastName}

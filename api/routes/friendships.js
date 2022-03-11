@@ -1,7 +1,10 @@
 const router = require('express').Router();
 const fetch = require('node-fetch');
+const mongoose = require('mongoose');
+mongoose.Promise = require('bluebird')
 
 let Friendship = require('../models/friendship.model.js');
+let Profile = require('../models/profile.model');
 
 require('dotenv').config();
 
@@ -28,7 +31,7 @@ async function getProfilePicture(id) {
 }
 
 router.route('/add').post(async (req, res) => {
-    let {sender_id, user_id, user_first, user_last, sender_first, sender_last} = req.query;
+    let {sender_id, user_id, user_first, user_last, sender_first, sender_last} = req.body;
     // let {userPicture} = req.body
 
     // await getProfilePicture(added_id).then(async (addingPicture) => {
@@ -102,15 +105,39 @@ router.route('/exists').get(async (req, res) => {
 })
 
 router.route('/getAll').get(async (req, res) => {
-    let {id} = req.query
+    let {id} = req.query;
 
-    await Friendship.find({ friendship: {$elemMatch: {id: id}}}, function(err, friendships) {
+    await Friendship.find({ friendship: {$elemMatch: {id: id}}}).then(function(friendships) {
+        let queries = [];
         if (friendships.length > 0) {
-            res.status(200).json({data: friendships})
+            friendships.forEach((friendship) => {
+                let obj = friendship['friendship']
+
+                queries.push(
+                    Profile.findOne({userId: obj[0]['id'] != id? obj[0]['id']: obj[1]['id']})
+                );
+            });
+            return Promise.all(queries);
         } else {
-            res.status(404).json({data: []})
+            res.status(404).json([])
         }
-    }) 
+        
+
+    }).then(profiles => {
+        let results = [];
+        for (let i = 0; i < profiles.length; i++) {
+            let profile = profiles[i];
+
+            results.push({
+                profilePicture: profile['profilePicture'],
+                id: profile['userId'],
+                firstName: profile['firstName'],
+                lastName: profile['lastName'],
+                bio: profile['bio']
+            });
+        }
+        res.status(200).json(results);
+    })
 })
 
 router.route('/update').post(async (req, res) => {

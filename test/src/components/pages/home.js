@@ -118,10 +118,10 @@ export default class Home extends Component{
     }
 
     displayRequests = async () => {
-        let {token, userLast, userId, user, profilePicture} = this.state;
+        let {token, firstName, userId, lastName, profilePicture} = this.state;
         // let that = this
         this.setState({
-            display: <RequestsDisplay userPicture={profilePicture} token={token} userLast={userLast} userId={userId} userFirst={user}/>
+            display: <RequestsDisplay userPicture={profilePicture} token={token} userLast={lastName} userId={userId} userFirst={firstName}/>
         })
 
         // await fetch("http://localhost:9000/friend-requests/getRequests?receiverId="+userId, {
@@ -155,7 +155,7 @@ export default class Home extends Component{
                 }).then((res) => {
                     res.json().then(data => {
                         that.setState({
-                            display: <FriendsController displayMessages={this.displayMessages} display="friends" userId={userId} token={token} friends={data['data']} firstName={user} lastName={userLast} query="" />,
+                            display: <FriendsController displayMessages={this.displayMessages} display="friends" userId={userId} token={token} friends={data} firstName={user} lastName={userLast} query="" />,
                             friendData: data,
                         })
                     })

@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const fetch = require('node-fetch');
 
+
 require('dotenv').config();
 
 let Profile = require('../models/profile.model.js');
@@ -35,7 +36,8 @@ router.route('/findProfile').get(async (req, res) => {
                         "firstName": data["firstName"],
                         "lastName": data["lastName"],
                         "_id": data["userId"], 
-                        "profilePicture": data['profilePicture']
+                        "profilePicture": data['profilePicture'], 
+                        "bio": data['bio']
                     })
                 }
             })
@@ -223,6 +225,31 @@ router.route('/getLocations').get(async (req, res) => {
             res.status(200).json(locations);
         }
     })
-})
+});
+
+router.route('/updateBio').post(async (req, res) => {
+    const {userId, bio} = req.body;
+
+    await Profile.findOne({userId}, async (err, profile) => {
+        if (err) {
+            res.status(500).json(err);
+        } 
+        else if (!profile) {
+            res.status(404).json("Error finding profile.");
+        }else {
+            await Profile.updateOne({userId}, {$set: {bio}});
+            res.status(200).json(bio)
+        }
+    });
+
+    // await Profile.findOneAndUpdate({userId}, {$set: {bio}}, function(err, profile) {
+    //     if (err) {
+    //         res.status(500).json(err);
+    //     }
+    //     else {
+    //         res.status(200).json(bio);
+    //     }
+    // });
+});
 
 module.exports = router;
