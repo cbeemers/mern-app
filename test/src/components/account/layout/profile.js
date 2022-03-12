@@ -1,8 +1,10 @@
 import React, {Component} from 'react'
 
+import Post from './post'
 import ProfileHeader from '../../layout/profileHeader'
 import FriendsDisplay from '../layout/friends'
 import { checkToken, getCookie } from '../../cookie'
+import { displayPosts } from '../helpers/post'
 
 export default class Profile extends Component {
     constructor(props) {
@@ -17,6 +19,8 @@ export default class Profile extends Component {
             profilePicture: props.profilePicture,
             display: null,
             exists: props.exists,
+            posts: [], 
+            displayType: "posts"
         }
 
         this.openProfile = this.props.openProfile.bind(this);
@@ -26,47 +30,61 @@ export default class Profile extends Component {
         
     }
 
+    componentDidMount() {
+        this.getUserPosts();
+    }
+
     getFriends = async (event) => {
         event.preventDefault()
-        let {userId, firstName, lastName, token, display} = this.state
+        let {userId, firstName, lastName, token, display, displayType, posts} = this.state
         let that = this
 
-        if (display == null) {
+        if (displayType == "posts") {
             await fetch("http://localhost:9000/friendships/getAll?id="+userId).then(res => {
                 res.json().then(data => {
-                  //   console.log(data['data'])
-                  //   console.log(userId)
-                    that.setState({display: <FriendsDisplay 
-                      friends={data} firstName={firstName}
-                      lastName={lastName}
-                      id={userId}
-                      token={token}
-                      openProfile={that.openProfile}
-                      type="profile"
-                      friendshipExists={this.friendshipExists}
-                      addFriend={this.addFriend}
-                      
-                      />})
-                })  
-              })
+                    that.setState({displayType: "friends", 
+                    display: <FriendsDisplay 
+                        friends={data} firstName={firstName}
+                        lastName={lastName}
+                        id={userId}
+                        token={token}
+                        openProfile={that.openProfile}
+                        type="profile"
+                        friendshipExists={this.friendshipExists}
+                        addFriend={this.addFriend}
+                        
+                    />});
+                });  
+            });
         }
         else {
-            this.setState({display: null})
+            this.setState({display: displayPosts(posts), displayType: "posts"})
         }
+    }
 
+    getUserPosts = async() => {
+        let {userId, posts} = this.state;
+        let that = this;
 
-
+        await fetch('http://localhost:9000/feed/getUserPosts?userId='+userId, {
+            method: 'GET'
+        }).then(res => {
+            res.json().then(posts => {
+                console.log(posts)
+                that.setState({posts, display: displayPosts(posts)});
+            });
+        });
     }
 
     render() {
-        let {userId, display, profilePicture, firstName, lastName, bio, joinedDate} = this.state
+        let {userId, display, profilePicture, firstName, lastName, bio, joinedDate, posts} = this.state
         console.log(firstName)
         return (
             <div>
                 <div style={userInfo}>
                     <img src={profilePicture} style={profilePictureStyle} />
                     <h2>{firstName} {lastName}</h2>
-                    <div style={bioContainer}><p>{bio}</p></div>
+                    <div style={bioContainer}><p>{bio}</p><div style={messageButtonContainer}><img style={messageButton} src={'./img/msg.png'} /></div></div>
                     <div onClick={this.getFriends} style={friendsDropdown}>
                         <h3 style={{padding: "1em"}}>Friends</h3>
                         <img style={{height: "2em", width: "2em", borderRadius: "10%"}} src="./img/arrow.png" />
@@ -81,7 +99,9 @@ export default class Profile extends Component {
 }
 
 const bioContainer = {
-    maxWidth: 350
+    maxWidth: 350,
+    display: 'flex',
+    flexDirection: 'row',
 }
 
 const friendsDropdown = {
@@ -92,6 +112,16 @@ const friendsDropdown = {
     padding: "1em", 
     alignItems: "center", 
     justifyContent: "center"
+}
+
+const messageButton = {
+    width: 60, 
+    height: 50,
+    borderRadius: '40%',
+}
+const messageButtonContainer = {
+    display: 'block',
+    margin: 'auto'
 }
 
 const profilePictureStyle = {

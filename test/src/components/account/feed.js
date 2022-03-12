@@ -1,5 +1,6 @@
 import React, {Component} from 'react'
 import Post from './layout/post'
+import { displayPosts } from './helpers/post'
 
 export default class Feed extends Component {
     constructor(props) {
@@ -15,9 +16,13 @@ export default class Feed extends Component {
 
     componentDidMount() {
         // Get posts
+        this.getFeed();
+    }
+
+    getFeed = async () => {
         let {userId} = this.state;
         let that = this;
-        fetch("http://localhost:9000/feed/getFeed?userId="+userId, {
+        await fetch("http://localhost:9000/feed/getFeed?userId="+userId, {
             method: "GET",
         }).then(async res => {
             await res.json().then(posts => {
@@ -50,32 +55,32 @@ export default class Feed extends Component {
         });
     }
 
-    openPost = () => {
-        // Get all comments, magnify the opened post
-        console.log("open")
-    }
+    // openPost = () => {
+    //     // Get all comments, magnify the opened post
+    //     console.log("open")
+    // }
 
     refreshFeed = () => {
         // Retrieve new posts
     }
 
-    displayPosts = () => {
-        // Cycle through map of posts 
-        let {posts, profilePicture} = this.state
-        return posts.map((post, i) => {
-            return (<Post 
-                        numberLikes={post['numberLikes']} 
-                        content={post['content']}
-                        userName={post['userName']}
-                        profilePicture={post['profilePicture']}
-                        createdAt={post['createdAt']}
-                        openPost={this.openPost.bind(this)}
-                    />);
-        });
-    }
+    // displayPosts = () => {
+    //     // Cycle through map of posts 
+    //     let {posts} = this.state
+    //     return posts.map((post, i) => {
+    //         return (<Post 
+    //                     numberLikes={post['numberLikes']} 
+    //                     content={post['content']}
+    //                     userName={post['userName']}
+    //                     profilePicture={post['profilePicture']}
+    //                     createdAt={post['createdAt']}
+    //                     openPost={this.openPost.bind(this)}
+    //                 />);
+    //     });
+    // }
 
     render() {
-        let {profilePicture, newPostContent} = this.state;
+        let {profilePicture, newPostContent, posts} = this.state;
 
         return (
             <div style={feedContainer}>
@@ -93,7 +98,7 @@ export default class Feed extends Component {
                     <button onClick={() => this.createPost(null)} style={postButton}>Post</button>
                 </div>
                 <div style={postContainer}>
-                    {this.displayPosts()}
+                    {displayPosts(posts, this)}
                 </div>
             </div>
         );

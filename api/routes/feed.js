@@ -5,6 +5,7 @@ mongoose.Promise = require('bluebird');
 require('dotenv').config();
 
 const Post = require('../models/post.model');
+const Profile = require('../models/profile.model');
 const getAllFriendshipProfiles = require('../helpers/friendships');
 
 function sortPosts(posts) {
@@ -38,13 +39,39 @@ router.route('/createPost').post((req, res) => {
 router.route('/getUserPosts').get(async (req, res) => {
     let {userId} = req.query;
 
-    await Post.find({userId, parent: null}, (err, posts) => {
+    await Profile.findOne({userId}, async (err, user) => {
         if (err) {
             res.status(500).json(err);
-        } else if (posts.length == 0) {
-            res.status(200).json([]);
+        } else if (!user) {
+            res.status(404).json("User not found")
         } else {
-            res.status(200).json(sortPosts(posts));
+            await Post.find({userId, parent: null}, (err, posts) => {
+                console.log(user)
+                if (err) {
+                    res.status(500).json(err);
+                } else if (posts.length == 0) {
+                    res.status(200).json([]);
+                } else {
+                    let results = [];
+                    posts.forEach(post => {
+                        post['profilePicture'] = user['profilePicture'];
+                        post['userName'] = user['firstName'] + " " + user['lastName']
+                        results.push({
+                            postId: post['_id'],
+                            userId: user['_id'],
+                            createdAt: post['createdAt'],
+                            profilePicture: user['profilePicture'],
+                            content: post['content'],
+                            numberLikes: post['numberLikes'],
+                            parent: post['parent'],
+                            userName: user['firstName'] + " " + user['lastName']
+                        });
+                    });
+
+                    console.log(posts)
+                    res.status(200).json(sortPosts(results));
+                }
+            });
         }
     });
 })
