@@ -11,18 +11,6 @@ const requestSchema = new SCHEMA({
         type: String,
         required: true
     },
-    // senderFirst: {
-    //     type: String,
-    //     required: true,
-    // },
-    // senderLast: {
-    //     type: String,
-    //     required: true,
-    // },
-    // senderPicture: {
-    //     type: String,
-    //     required: true,
-    // }
 }, 
 {
     timestamps: true

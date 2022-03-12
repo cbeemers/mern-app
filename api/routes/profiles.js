@@ -1,10 +1,9 @@
 const router = require('express').Router();
-const fetch = require('node-fetch');
-
 
 require('dotenv').config();
 
-let Profile = require('../models/profile.model.js');
+const Profile = require('../models/profile.model');
+const Post = require('../models/post.model');
 let upload = require('../storage/upload');
 
 router.route('/getProfile').get(async (req, res) => {
@@ -70,6 +69,25 @@ router.route('/getFromProfile').get(async (req, res) => {
             }
         }
     });
+});
+
+router.route('/getAllUserPosts').get((req, res) => {
+    let {userId} = req.query;
+    
+    Post.find({userId}, '_id createdAt content numberLikes parent' ,async function(err, posts) {
+        if (!posts) {
+            res.status(404).json("No posts for user");
+        } else if (err) {
+            res.status(500).json(err)
+        } else {
+            res.status(200).json(posts);
+        }
+    }).sort('createdAt');
+
+});
+
+router.route('/deletePost').post((req, res) => {
+
 });
 
 router.route('/updateProfilePicture').post(upload.any(), async function(req, res) {

@@ -44,26 +44,44 @@ export default class Profile extends Component {
             let that = this;
             checkToken(token).then(userId => {
                 console.log(userId)
-                fetch("http://localhost:9000/profiles/getProfile?userId="+userId, {
-                    method: "GET",
-                    "Content-Type": "application/json",
-                }).then(res => {
-                    res.json().then(data => {
-                        console.log(data)
-                        that.setState({
-                            firstName: data['firstName'],
-                            lastName: data['lastName'], 
-                            profilePicture: data['profilePicture'], 
-                            joined: data['createdAt'],
-                            stocks: data['stocks'],
-                            cities: data['locations'],
-                            bio: data['bio'],
-                            _id: userId,
-                        })
-                    })
-                })
+                this.getProfile(userId);
+                this.getPosts(userId);
             });       
         }
+    }
+
+    getProfile = (userId) => {
+        let that = this;
+
+        fetch("http://localhost:9000/profiles/getProfile?userId="+userId, {
+            method: "GET",
+            "Content-Type": "application/json",
+        }).then(res => {
+            res.json().then(data => {
+                console.log(data)
+                that.setState({
+                    firstName: data['firstName'],
+                    lastName: data['lastName'], 
+                    profilePicture: data['profilePicture'], 
+                    joined: data['createdAt'],
+                    stocks: data['stocks'],
+                    cities: data['locations'],
+                    bio: data['bio'],
+                    _id: userId,
+                });
+            });
+        });
+    }
+
+    getPosts = (userId) => {
+        let that = this;
+        fetch('http://localhost:9000/feed/getUserPosts?userId='+userId, {
+            method: 'GET'
+        }).then(async res => {
+            await res.json().then(posts => {
+                console.log(posts)
+            });
+        });
     }
 
     editBio = (e) => {
@@ -165,10 +183,10 @@ export default class Profile extends Component {
             return (
                 <div style={bioContainer}>
                     <textarea 
-                        value={bio==""? "Insert bio here.": bio}
+                        value={bio}
                         type="text" 
                         maxLength={140}
-                        style={{minHeight: '7em', backgroundColor: '#192635', color: 'white'}}
+                        style={{minHeight: '7em', backgroundColor: '#192635', color: 'white', resize: 'none'}}
                         onChange={(event) => this.editBio(event)} 
                     />
                     <div style={{alignSelf: 'flex-end'}}>{bio.length}/140</div>
@@ -192,7 +210,7 @@ export default class Profile extends Component {
         } else {
             return (
                 <div style={bioContainer}>
-                    <p style={{padding: "1em", margin: '0'}}>{bio}</p>
+                    <p style={{padding: "1em", margin: '0'}}>{bio==""? "Insert bio here.": bio}</p>
                     <img 
                         onClick={() => this.setState({editing: true})} 
                         src={'./img/edit.png'} 

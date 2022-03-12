@@ -26,44 +26,6 @@ export default class Profile extends Component {
         
     }
 
-    componentDidMount() {
-        let {userId, exists} = this.state
-        let that = this
-        // console.log(userId)
-
-        // fetch("http://localhost:9000/profiles/getUser?_id="+userId, {
-        //     method: "GET",
-        //     'Content-Type': 'application/json'
-        // }).then(res => {
-        //     res.json().then(data => {
-        //         that.setState({
-        //             firstName: data['firstName'], 
-        //             lastName: data['lastName'], 
-        //             profilePicture: data['profilePicture'], 
-        //             joinedDate: data['joinedDate'],
-        //             header: <ProfileHeader displayMessages={this.displayMessages} addFriend={this.addFriend} id={userId} profilePicture={data['profilePicture']} firstName={data['firstName']} lastName={data['lastName']} joinedDate={data['joinedDate']} exists={exists}/>
-        //         })
-        //         console.log(data)
-        //     })
-        // })
-
-        // fetch("http://localhost:9000/profiles/getProfile", {
-        //     method: "GET",
-        //     "Content-Type": "application/json",
-        //     body: {userId}
-        // }).then(res => {
-        //     res.json().then(data => {
-        //         that.setState({
-        //             firstName: data['firstName'],
-        //             lastName: data['lastName'], 
-        //             profilePicture: data['profilePicture'], 
-        //             joinedDate: data['joinedDate'],
-        //             header: <ProfileHeader displayMessages={this.displayMessages} addFriend={this.addFriend} id={userId} profilePicture={data['profilePicture']} firstName={data['firstName']} lastName={data['lastName']} joinedDate={data['joinedDate']} exists={exists}/>
-        //         })
-        //     })
-        // })
-    }
-
     getFriends = async (event) => {
         event.preventDefault()
         let {userId, firstName, lastName, token, display} = this.state
@@ -104,7 +66,7 @@ export default class Profile extends Component {
                 <div style={userInfo}>
                     <img src={profilePicture} style={profilePictureStyle} />
                     <h2>{firstName} {lastName}</h2>
-                    <p>{bio}</p>
+                    <div style={bioContainer}><p>{bio}</p></div>
                     <div onClick={this.getFriends} style={friendsDropdown}>
                         <h3 style={{padding: "1em"}}>Friends</h3>
                         <img style={{height: "2em", width: "2em", borderRadius: "10%"}} src="./img/arrow.png" />
@@ -116,6 +78,10 @@ export default class Profile extends Component {
             </div>
         )
     }
+}
+
+const bioContainer = {
+    maxWidth: 350
 }
 
 const friendsDropdown = {
@@ -137,12 +103,13 @@ const profilePictureStyle = {
 
 const userInfo = {
     // margin: "auto 0", 
+    backgroundColor: '#192635',
     display: 'flex',
     flexDirection: 'column',
-    backgroundColor: '#192635',
     minHeight: '8em',
     width: '100%',
     justifyContent: 'center',
     alignItems: "center", 
+    padding: 10,
 }
 

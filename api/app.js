@@ -26,7 +26,8 @@ var stockRouter = require('./routes/stock');
 var friendshipRouter = require('./routes/friendships');
 var preferenceRouter = require('./routes/preferences'); 
 var profileRouter = require('./routes/profiles');
-var requestRouter = require('./routes/friend-requests')
+var requestRouter = require('./routes/friend-requests');
+var postRouter = require('./routes/feed');
 // var withAuth = require('./routes/middleware')
 
 var app = express();
@@ -70,6 +71,7 @@ app.use('/stock', stockRouter);
 app.use('/preferences', preferenceRouter);
 app.use('/profiles', profileRouter);
 app.use('/friend-requests', requestRouter);
+app.use('/feed', postRouter);
 app.get('/checkToken', (req, res) => {
 
   const token = req.query.token;

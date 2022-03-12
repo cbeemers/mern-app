@@ -8,6 +8,7 @@ import Login from '../account/login'
 import Weather from '../pages/weather'
 import Stock from '../pages/stocks'
 import Signup from '../account/signup'
+import Feed from '../account/feed';
 // import { profileContent } from '../layout/style'; 
 import MessageDisplay from '../account/layout/messages'
 import FriendsController from '../controllers/friends-controller'
@@ -21,7 +22,7 @@ export default class Home extends Component{
         // let user = '';
 
         this.state = {
-            display: <Welcome />,
+            display: null,
             token: getCookie('token'),
             firstName: "",
             lastName: "",
@@ -56,40 +57,12 @@ export default class Home extends Component{
                             locations: profile['locations'],
                             firstName: profile['firstName'],
                             lastName: profile['lastName'],
+                            display: <Feed userId={userId} profilePicture={profile['profilePicture']} />
 
                         });
                     });
                 });
             });
-
-            //     await fetch("http://localhost:9000/users/getFromUser?type=all&token="+token, {
-            //         method: 'GET',
-            //         query: token
-            //     }).then(res => {
-            //         if (res.status === 200) {
-            //             console.log(userId)
-                        
-            //             res.json().then(data => {
-            //                 // console.log(data);
-            //                 user = String(data['firstName'])[0].toUpperCase() + String(data['firstName']).slice(1);
-            //                 let userLast = String(data['lastName'])
-            //                 that.setState({user:userId, display: <Welcome userId={userId} token={token} userId={userId} />, userLast: userLast, userId: userId, profilePicture: data['profilePicture']});
-            //                 // that.setState({user:user, display: <Counter count={111}/>, userLast: userLast, userId: userId});
-            //                 fetch("http://localhost:9000/preferences/getAll?id="+userId, {method: "GET"}).then(response => {
-            //                     if (response.status === 200) {
-            //                         response.json().then(prefData => {
-            //                             console.log(prefData)
-            //                             that.setState(prefData)
-            //                         })
-                                    
-            //                     } 
-            //                 })
-            //             })
-            
-            //         }
-            //     });
-
-            // });
         }
         else {
             this.setState({display: <Login signup={this.signup}/>})

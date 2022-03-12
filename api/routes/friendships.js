@@ -1,10 +1,11 @@
 const router = require('express').Router();
 const fetch = require('node-fetch');
 const mongoose = require('mongoose');
-mongoose.Promise = require('bluebird')
+mongoose.Promise = require('bluebird');
+let getAllFriendshipProfiles = require('../helpers/friendships');
 
-let Friendship = require('../models/friendship.model.js');
-let Profile = require('../models/profile.model');
+const Friendship = require('../models/friendship.model');
+const Profile = require('../models/profile.model');
 
 require('dotenv').config();
 
@@ -102,50 +103,15 @@ router.route('/exists').get(async (req, res) => {
     })
 
 
-})
+});
 
 router.route('/getAll').get(async (req, res) => {
     let {id} = req.query;
 
-    await Friendship.find({ friendship: {$elemMatch: {id: id}}}).then(function(friendships) {
-        let queries = [];
-        if (friendships.length > 0) {
-            friendships.forEach((friendship) => {
-                let obj = friendship['friendship']
+    await getAllFriendshipProfiles(id).then(results => {
+        res.status(200).json(results)
+    });
+});
 
-                queries.push(
-                    Profile.findOne({userId: obj[0]['id'] != id? obj[0]['id']: obj[1]['id']})
-                );
-            });
-            return Promise.all(queries);
-        } else {
-            res.status(404).json([])
-        }
-        
-
-    }).then(profiles => {
-        let results = [];
-        for (let i = 0; i < profiles.length; i++) {
-            let profile = profiles[i];
-
-            results.push({
-                profilePicture: profile['profilePicture'],
-                id: profile['userId'],
-                firstName: profile['firstName'],
-                lastName: profile['lastName'],
-                bio: profile['bio']
-            });
-        }
-        res.status(200).json(results);
-    })
-})
-
-router.route('/update').post(async (req, res) => {
-    let {id} = req.query
-    let {firstName, lastName, profilePicture} = req.body
-
-
-
-})
 
 module.exports = router

@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {getCookie} from '../../cookie';
+import {getCookie, checkToken} from '../../cookie';
 import Header from '../../layout/Header'
 import Profile from './profile'
 
@@ -25,7 +25,8 @@ export default class FriendsDisplay extends Component {
             token: props.token,
             header,
             profileId: "",
-            type: props.type
+            type: props.type, 
+            currUser:""
         }
         
         // Open profile is function of the friends component controller
@@ -40,6 +41,15 @@ export default class FriendsDisplay extends Component {
         
     }
 
+    componentDidMount() {
+        let token = getCookie('token')
+        let that = this;
+        if (token) {
+            checkToken(token).then(userId => {
+                that.setState({currUser: userId});
+            });
+        }
+    }
 
     search = async () => {
         let {query} = this.state
@@ -65,57 +75,6 @@ export default class FriendsDisplay extends Component {
         })
     }
 
-    // addFriend = async (_id, event) => {
-    //     // const _id = event.target.id
-    //     const {firstName, lastName, token} = this.state
-
-    //     await fetch("http://localhost:9000/users/sendRequest?_id="+_id+"&firstName="+firstName+"&lastName="+lastName+"&token="+token, {
-    //         method: 'POST',
-    //         headers: {
-    //             'Content-Type': 'application/json'
-    //         }
-    //     }).then((res) =>{
-    //         res.json().then(data => {
-    //             console.log(data)
-    //         })
-    //     })
-    // }
-
-    // removeFriend = async (removedId, event) => {
-    //     event.preventDefault()
-    //     const {_id} = this.state
-    //     let that = this
-        
-    //     if (window.confirm("Remove friend?")) {
-    //         await fetch("http://localhost:9000/friendships/remove?senderId="+_id+"&removedId="+removedId, {
-    //                 method: 'POST',
-    //                 headers: {
-    //                     'Content-Type': 'application/json'
-    //                 }
-    //             }).then((res) => {
-    //                 res.json().then(async (result) => {
-    //                     console.log(result)
-    //                     if (result['msg'] == "success") {
-    //                         await fetch("http://localhost:9000/friendships/getAll?id="+_id, {
-    //                             method: "GET",
-    //                             headers: {
-    //                                 'Content-Type': 'application/json',
-    //                             }
-    //                         }).then((res) => {
-    //                             res.json().then(data => {
-    //                                 console.log(data)
-    //                                 that.setState({
-    //                                     friends: data['data']
-    //                                 })
-    //                             })
-    //                         })
-    //                     }
-    //                 })
-    //             })
-    //     }
-    // }
-    
-
     handleSubmit = (event) => {
         event.preventDefault();
 
@@ -125,16 +84,6 @@ export default class FriendsDisplay extends Component {
     handleChange = (event) => {
         this.setState({query: event.target.value});
     }
-
-    // openProfile = (event) => {
-    //     let id = event.target.id
-    //     console.log(id)
-    //     if (id) {
-    //         this.setState({display: <Profile userId={id} />, profileId: id, header: null})
-    //     } else {
-            
-    //     }
-    // }
 
     displayRemove = (id) => {
         let {type} = this.state
@@ -149,11 +98,6 @@ export default class FriendsDisplay extends Component {
 
         if (display == "friends") {
             return friends.map((friendship, i) => {
-                // friend = friend[0].toUpperCase() + friend.slice(1)
-                // let friendship = friend['friendship']
-
-                // Index into friendship array for the non current user
-
                 let name = friendship["firstName"] + " " + friendship["lastName"]
 
                 return (
@@ -211,10 +155,10 @@ export default class FriendsDisplay extends Component {
     }
 
     render() {
-        let {header} = this.state
+        let {header, currUser, _id} = this.state
         return(
             <div style={{width: "100%"}}>
-            {header}
+            {currUser==_id? header: null}
             {this.displaySearch()}
             <div style={{color: "black"}}>
             {this.displayFriends()}
