@@ -7,6 +7,7 @@ require('dotenv').config();
 const Post = require('../models/post.model');
 const Profile = require('../models/profile.model');
 const getAllFriendshipProfiles = require('../helpers/friendships');
+const Like = require('../models/like.model');
 
 function sortPosts(posts) {
     posts.sort((a, b) => {
@@ -19,6 +20,19 @@ function sortPosts(posts) {
     });
 
     return posts;
+}
+
+function createPost(user, post) {
+    return {
+            postId: post['_id'],
+            userId: user['userId'],
+            createdAt: post['createdAt'],
+            profilePicture: user['profilePicture'],
+            content: post['content'],
+            numberLikes: post['numberLikes'],
+            parent: post['parent'],
+            userName: user['firstName'] + " " + user['lastName']
+        }
 }
 
 router.route('/createPost').post((req, res) => {
@@ -46,7 +60,6 @@ router.route('/getUserPosts').get(async (req, res) => {
             res.status(404).json("User not found")
         } else {
             await Post.find({userId, parent: null}, (err, posts) => {
-                console.log(user)
                 if (err) {
                     res.status(500).json(err);
                 } else if (posts.length == 0) {
@@ -54,21 +67,8 @@ router.route('/getUserPosts').get(async (req, res) => {
                 } else {
                     let results = [];
                     posts.forEach(post => {
-                        post['profilePicture'] = user['profilePicture'];
-                        post['userName'] = user['firstName'] + " " + user['lastName']
-                        results.push({
-                            postId: post['_id'],
-                            userId: user['_id'],
-                            createdAt: post['createdAt'],
-                            profilePicture: user['profilePicture'],
-                            content: post['content'],
-                            numberLikes: post['numberLikes'],
-                            parent: post['parent'],
-                            userName: user['firstName'] + " " + user['lastName']
-                        });
+                        results.push(createPost(user, post));
                     });
-
-                    console.log(posts)
                     res.status(200).json(sortPosts(results));
                 }
             });
@@ -122,19 +122,67 @@ router.route('/getFeed').get(async (req, res) => {
     });
 });
 
-router.route('/likePost').post((req, res) => {
-    let {postId} = req.body;
+router.route('/getUserLike').get(async (req, res) => {
+    let {postId, userId} = req.query;
+
+    await Like.findOne({postId, userId}, (err, like) => {
+        if (like) {
+            res.status(200).json(true);
+        } else if (err) {
+            res.status(500).json(err);
+        } else {
+            res.status(200).json(false);
+        }
+    })
+}); 
+
+router.route('/likePost').post(async (req, res) => {
+    let {postId, userId} = req.body;
+    const newLike = new Like({postId, userId});
+
+    await Post.updateOne({_id: postId}, {$inc: {numberLikes: 1}}).then(() => {
+        newLike.save();
+        res.status(200).json("Liked");
+    });
 
 });
 
-router.route('unlikePost').post((req, res) => {
-    let {postId} = req.body;
+router.route('/unlikePost').post(async (req, res) => {
+    let {postId, userId} = req.body;
 
+    await Post.updateOne({_id: postId}, {$inc: {numberLikes: -1}}).then(async () => {
+        await Like.deleteOne({postId, userId}).then(() => {
+            res.status(200).json("Disliked")
+        })
+    })
 });
 
-router.route('/getComments').get((req, res) => {
+router.route('/getComments').get(async (req, res) => {
     let {postId} = req.query;
+    let posts = [];
+    let queries = [];
 
+    await Post.find({parent: postId}).then(async (comments) => {
+        if (comments.length == 0) {
+            res.status(200).json([]);
+        } else {
+            posts = comments;
+            comments.forEach((comment) => {
+                queries.push(Profile.findOne({userId: comment['userId']}));
+            });
+            return Promise.all(queries);
+        }
+    }).then(users => {
+        let results = [];
+        console.log(users)
+        for (let i = 0; i < users.length; i++) {
+            let user = users[i];
+            let post = posts[i];
+            results.push(createPost(user, post));
+        }
+
+        res.status(200).json(sortPosts(results));
+    })
 
 });
 

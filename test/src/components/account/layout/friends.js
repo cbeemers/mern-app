@@ -9,10 +9,10 @@ export default class FriendsDisplay extends Component {
     constructor(props) {
         super(props)
         // console.log(props.friends)
-        let header = (<Header title={"Your Friends"} />)
-        if (props.header !== undefined) {
-            header = props.header
-        }
+        // let header = (<Header title={"Your Friends"} />)
+        // if (props.header !== undefined) {
+        //     header = props.header
+        // }
         
         this.state = {
             friends: props.friends,
@@ -23,7 +23,7 @@ export default class FriendsDisplay extends Component {
             lastName: props.lastName, 
             _id: props.id,
             token: props.token,
-            header,
+            // header,
             profileId: "",
             type: props.type, 
             currUser:""
@@ -155,10 +155,10 @@ export default class FriendsDisplay extends Component {
     }
 
     render() {
-        let {header, currUser, _id} = this.state
+        let {currUser, _id} = this.state
         return(
             <div style={{width: "100%"}}>
-            {currUser==_id? header: null}
+            {/* {currUser==_id? header: null} */}
             {this.displaySearch()}
             <div style={{color: "black"}}>
             {this.displayFriends()}

@@ -3,6 +3,7 @@ import React, {Component} from 'react'
 import FriendsDisplay from '../account/layout/friends'
 import Profile from '../account/layout/profile'
 import Stack from '../stack'
+import Header from '../layout/Header'
 
 export default class FriendsController extends Component {
     constructor(props) {
@@ -33,7 +34,8 @@ export default class FriendsController extends Component {
             displayComponent,
             profileId: "",
             exists: true, // If friendship already exists
-            userId: props.userId
+            userId: props.userId,
+            header: <Header title={"Your Friends"} />
         }
 
         this.displayMessages = this.props.displayMessages.bind()
@@ -42,16 +44,16 @@ export default class FriendsController extends Component {
     openProfile = async (friendship, event) => {
 
         if (event.target.title == ""){
-            let {stack, userId} = this.state
+            let {stack, id} = this.state
             let exists = await this.friendshipExists(friendship['id'])
     
             if (friendship['id']) {
                 if (this.state.displayComponent.type === (<Profile />).type) {
                     await this.setState({displayComponent: null})
                 }
-                let displayComponent = (<Profile bio={friendship['bio']} firstName={friendship['firstName']} lastName={friendship['lastName']} displayMessages={this.displayMessages} addFriend={this.addFriend} friendshipExists={this.friendshipExists} userId={friendship['id']} profilePicture={friendship['profilePicture']} openProfile={this.openProfile} exists={exists} />)
+                let displayComponent = (<Profile bio={friendship['bio']} firstName={friendship['firstName']} lastName={friendship['lastName']} displayMessages={this.displayMessages} addFriend={this.addFriend} friendshipExists={this.friendshipExists} userId={friendship['id']} profilePicture={friendship['profilePicture']} openProfile={this.openProfile} exists={exists} currUser={id} />)
                 stack.enqueue(displayComponent)
-                await this.setState({displayComponent, stack, profileId: friendship['id'], exists})
+                await this.setState({displayComponent, stack, profileId: friendship['id'], exists, header: null})
                 
             }
         }
@@ -159,19 +161,24 @@ export default class FriendsController extends Component {
 
     backPage = async () => {
         let {stack} = this.state
-        await this.setState({displayComponent: null})
-        let displayComponent = stack.dequeue()
-        await this.setState({stack, displayComponent})
+        // await this.setState({displayComponent: null})
+        let displayComponent = stack.dequeue();
+        let header = null
+        if (stack.currIndex() == 0) {
+            header = <Header title={"Your Friends"} />
+        }
+        await this.setState({stack, displayComponent, header})
     }
 
     render () {
-        let {stack, displayComponent} = this.state
+        let {stack, displayComponent, header} = this.state
 
         // let displayComponent = stack.curr()
         // console.log(displayComponent)
 
         return (
             <div>
+                {header}
                 {this.displayStackNav()}
                 {displayComponent}
             </div>

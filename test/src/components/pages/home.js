@@ -135,12 +135,12 @@ export default class Home extends Component{
                 })
             }
         } 
-        else {
-            let {friendData} = this.state
-            await this.setState({display: null})
-            await this.setState({display: <FriendsController displayMessages={this.displayMessages} display="friends" userId={userId} friends={friendData['data']} id={userId} firstName={user} lastName={userLast} query="" />
-            })
-        }
+        // else {
+        //     let {friendData} = this.state
+        //     await this.setState({display: null})
+        //     await this.setState({display: <FriendsController displayMessages={this.displayMessages} display="friends" userId={userId} friends={friendData['data']} id={userId} firstName={user} lastName={userLast} query="" />
+        //     })
+        // }
 
     }
 

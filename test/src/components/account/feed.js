@@ -1,6 +1,8 @@
 import React, {Component} from 'react'
 import Post from './layout/post'
 import { displayPosts } from './helpers/post'
+import PostInput from './layout/postInput'
+import Stack from '../stack'
 
 export default class Feed extends Component {
     constructor(props) {
@@ -9,8 +11,11 @@ export default class Feed extends Component {
         this.state = {
             userId: props.userId,
             profilePicture: props.profilePicture,
-            newPostContent: '',
+            // newPostContent: '',
             posts: [],
+            stack: new Stack(null), 
+            parentPost: null, 
+            parentPostId: null
         }
     }
 
@@ -26,79 +31,84 @@ export default class Feed extends Component {
             method: "GET",
         }).then(async res => {
             await res.json().then(posts => {
-                that.setState({posts})
+                that.setState({posts: null})
+                that.setState({posts: displayPosts(posts, userId, that), stack: new Stack(null)})
             });
         });
     }
 
-    onChange = (e) => {
-        // Handle change of new post text input
-        this.setState({newPostContent: e.target.value})
-    }
+    // onChange = (e) => {
+    //     // Handle change of new post text input
+    //     this.setState({newPostContent: e.target.value})
+    // }
 
-    createPost = async (parentId) => {
-        let {userId, newPostContent} = this.state;
+    createPost = async (newPostContent, parentId) => {
+        let { userId, parentPostId } = this.state;
         let that = this;
 
-        await fetch('http://localhost:9000/feed/createPost', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                userId, content: newPostContent, parent: parentId 
-            })
-        }).then(async res => {
-            await res.json().then(() => {
-                this.setState({newPostContent: ''});
+        if (newPostContent != '') {
+            await fetch('http://localhost:9000/feed/createPost', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    userId, content: newPostContent, parent: parentId? parentId: parentPostId 
+                })
+            // }).then(async res => {
+            //     await res.json().then(() => {
+            //         this.setState({newPostContent: ''});
+            //     });
             });
-        });
+        }
     }
 
-    // openPost = () => {
-    //     // Get all comments, magnify the opened post
-    //     console.log("open")
-    // }
+    openPost = async (post) => {
+        // Get all comments, magnify the opened post
+        // console.log("open");
+        let {stack, userId} = this.state;
+        let that = this;
+
+        await fetch('http://localhost:9000/feed/getComments?postId='+post['postId'], {
+            method: 'GET'
+        }).then(async res => {
+            await res.json().then(comments => {
+                let parent = <Post openPost={that.openPost.bind(that)} openProfile={that.openProfile.bind(that)} state={post} />
+
+                stack.enqueue(post['postId'])
+                console.log(comments)
+                that.setState({posts: [], parentPost: null})
+                that.setState({
+                    parentPost: parent, 
+                    parentPostId: post['postId'], 
+                    stack, 
+                    posts: displayPosts(comments, userId, that)
+                });
+            })
+        })
+        
+    }
+
+    openProfile = (e) => {
+        e.stopPropagation();
+        console.log("profile");
+    }
 
     refreshFeed = () => {
         // Retrieve new posts
     }
 
-    // displayPosts = () => {
-    //     // Cycle through map of posts 
-    //     let {posts} = this.state
-    //     return posts.map((post, i) => {
-    //         return (<Post 
-    //                     numberLikes={post['numberLikes']} 
-    //                     content={post['content']}
-    //                     userName={post['userName']}
-    //                     profilePicture={post['profilePicture']}
-    //                     createdAt={post['createdAt']}
-    //                     openPost={this.openPost.bind(this)}
-    //                 />);
-    //     });
-    // }
-
     render() {
-        let {profilePicture, newPostContent, posts} = this.state;
-
+        let {profilePicture, posts, userId, stack, parentPost, parentPostId} = this.state;
+        let index = stack.currIndex();
+        console.log(index)
+        
         return (
             <div style={feedContainer}>
-                <div style={postObjectContainer}>
-                    <div style={postInputContainer}>
-                        <img style={userProfilePicture} src={profilePicture} />
-                        <textarea 
-                            value={newPostContent}
-                            style={postInput}
-                            maxLength={140}
-                            placeholder='New post...'
-                            onChange={(e) => this.onChange(e)}
-                        />
-                    </div>  
-                    <button onClick={() => this.createPost(null)} style={postButton}>Post</button>
-                </div>
+                {parentPost}
+                <PostInput profilePicture={profilePicture} createPost={this.createPost.bind(this)} parentId={parentPostId} />
                 <div style={postContainer}>
-                    {displayPosts(posts, this)}
+                    {posts}
                 </div>
             </div>
         );

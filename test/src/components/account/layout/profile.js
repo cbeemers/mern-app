@@ -4,6 +4,7 @@ import Post from './post'
 import ProfileHeader from '../../layout/profileHeader'
 import FriendsDisplay from '../layout/friends'
 import { checkToken, getCookie } from '../../cookie'
+import Feed from '../feed'
 import { displayPosts } from '../helpers/post'
 
 export default class Profile extends Component {
@@ -20,7 +21,8 @@ export default class Profile extends Component {
             display: null,
             exists: props.exists,
             posts: [], 
-            displayType: "posts"
+            displayType: "posts", 
+            currUserId: props.currUser
         }
 
         this.openProfile = this.props.openProfile.bind(this);
@@ -31,12 +33,15 @@ export default class Profile extends Component {
     }
 
     componentDidMount() {
-        this.getUserPosts();
+        // this.getUserPosts();
+        let {userId, profilePicture} = this.state;
+
+        this.setState({display: <Feed userId={userId} profilePicture={profilePicture} /> })
     }
 
     getFriends = async (event) => {
         event.preventDefault()
-        let {userId, firstName, lastName, token, display, displayType, posts} = this.state
+        let {userId, firstName, lastName, token, displayType, profilePicture} = this.state
         let that = this
 
         if (displayType == "posts") {
@@ -58,23 +63,23 @@ export default class Profile extends Component {
             });
         }
         else {
-            this.setState({display: displayPosts(posts), displayType: "posts"})
+            this.setState({display: <Feed userId={userId} profilePicture={profilePicture} />})
         }
     }
 
-    getUserPosts = async() => {
-        let {userId, posts} = this.state;
-        let that = this;
+    // getUserPosts = async() => {
+    //     let {userId, currUserId} = this.state;
+    //     let that = this;
 
-        await fetch('http://localhost:9000/feed/getUserPosts?userId='+userId, {
-            method: 'GET'
-        }).then(res => {
-            res.json().then(posts => {
-                console.log(posts)
-                that.setState({posts, display: displayPosts(posts)});
-            });
-        });
-    }
+    //     await fetch('http://localhost:9000/feed/getUserPosts?userId='+userId, {
+    //         method: 'GET'
+    //     }).then(res => {
+    //         res.json().then(posts => {
+    //             console.log(posts)
+    //             that.setState({posts, display: displayPosts(posts, currUserId, )});
+    //         });
+    //     });
+    // }
 
     render() {
         let {userId, display, profilePicture, firstName, lastName, bio, joinedDate, posts} = this.state
