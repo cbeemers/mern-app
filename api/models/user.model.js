@@ -18,9 +18,6 @@ const userSchema = new SCHEMA ({
         required: true,
         minlength: 6
     },
-    // picture {
-    //   type:  
-    // }
 },
     {
         timestamps: true

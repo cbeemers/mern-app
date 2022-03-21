@@ -52,14 +52,15 @@ router.route('/add').post((req, res) => {
     let fullName = (String(firstName) + String(lastName)).replace(/ /g, "").toLowerCase()
     const newUser = new User({email, password, firstName, lastName, fullName});
     
-    User.find({ email }, (err, previous) => {
+    User.findOne({ email }, (err, previous) => {
         if (err) {
             return res.status(500).json({
                 success: false,
+                serverError: true,
                 message: 'Error: Server error'
             });
         }
-        else if (previous.length > 0) {
+        else if (previous) {
             return res.status(401).json({
                 success: false,
                 message: "Email already in use!"

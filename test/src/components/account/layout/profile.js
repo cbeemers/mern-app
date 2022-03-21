@@ -5,7 +5,7 @@ import ProfileHeader from '../../layout/profileHeader'
 import FriendsDisplay from '../layout/friends'
 import { checkToken, getCookie } from '../../cookie'
 import Feed from '../feed'
-import { displayPosts } from '../helpers/post'
+import { getAllFriendships, displayPosts, getUserPosts } from '../helpers/functions'
 
 export default class Profile extends Component {
     constructor(props) {
@@ -35,8 +35,25 @@ export default class Profile extends Component {
     componentDidMount() {
         // this.getUserPosts();
         let {userId, profilePicture} = this.state;
+        let that = this;
 
-        this.setState({display: <Feed userId={userId} profilePicture={profilePicture} /> })
+        getUserPosts(userId).then(posts => {
+            that.setState({posts, display: <Feed userId={userId} profilePicture={profilePicture} posts={posts} /> })
+        })
+    }
+
+    getPosts = async () => {
+        let {userId} = this.state;
+        let that = this;
+
+        getUserPosts(userId).then(posts => {
+            that.setFeedDisplay(posts);
+        })
+    }
+
+    setFeedDisplay = (posts) => {
+        let {userId, profilePicture} = this.state;
+        this.setState({display: <Feed userId={userId} profilePicture={profilePicture} posts={posts} /> });
     }
 
     getFriends = async (event) => {
@@ -45,41 +62,26 @@ export default class Profile extends Component {
         let that = this
 
         if (displayType == "posts") {
-            await fetch("http://localhost:9000/friendships/getAll?id="+userId).then(res => {
-                res.json().then(data => {
-                    that.setState({displayType: "friends", 
-                    display: <FriendsDisplay 
-                        friends={data} firstName={firstName}
-                        lastName={lastName}
-                        id={userId}
-                        token={token}
-                        openProfile={that.openProfile}
-                        type="profile"
-                        friendshipExists={this.friendshipExists}
-                        addFriend={this.addFriend}
-                        
-                    />});
-                });  
-            });
+            await getAllFriendships(userId).then(data => {
+                that.setState({displayType: "friends", 
+                display: <FriendsDisplay 
+                    friends={data} firstName={firstName}
+                    lastName={lastName}
+                    id={userId}
+                    token={token}
+                    openProfile={that.openProfile}
+                    type="profile"
+                    friendshipExists={this.friendshipExists}
+                    addFriend={this.addFriend}
+                    
+                />});
+            });  
         }
         else {
-            this.setState({display: <Feed userId={userId} profilePicture={profilePicture} />})
+            let {posts} = this.state;
+            this.setFeedDisplay(posts)
         }
     }
-
-    // getUserPosts = async() => {
-    //     let {userId, currUserId} = this.state;
-    //     let that = this;
-
-    //     await fetch('http://localhost:9000/feed/getUserPosts?userId='+userId, {
-    //         method: 'GET'
-    //     }).then(res => {
-    //         res.json().then(posts => {
-    //             console.log(posts)
-    //             that.setState({posts, display: displayPosts(posts, currUserId, )});
-    //         });
-    //     });
-    // }
 
     render() {
         let {userId, display, profilePicture, firstName, lastName, bio, joinedDate, posts} = this.state

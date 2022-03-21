@@ -1,5 +1,6 @@
 import React, {Component} from 'react'
 
+import { likePost, dislikePost, didUserLike } from '../helpers/functions';
 
 export default class Post extends Component {
     constructor(props) {
@@ -29,16 +30,9 @@ export default class Post extends Component {
         const {postId, currUserId} = this.state;
         let that = this;
         
-        fetch('http://localhost:9000/feed/getUserLike?userId='+currUserId+'&postId='+postId, {
-            method: 'GET'
-        }).then(async res => {
-            await res.json().then((isLiked) => {
-                if (isLiked) {
-                    that.setState({liked: true});
-                } else {that.setState({liked: false})}
-            })
-        })
-    
+        didUserLike(postId, currUserId).then((isLiked) => {
+            that.setState({liked: isLiked});
+        });
     }
 
     likeController = async () => {
@@ -51,18 +45,8 @@ export default class Post extends Component {
         let {postId, currUserId, numberLikes} = this.state;
         let that = this;
 
-        await fetch('http://localhost:9000/feed/unlikePost', {
-            method: 'POST',
-            body: JSON.stringify({
-                postId, userId: currUserId
-            }),
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        }).then(async res => {
-            await res.json().then((data) => {
-                that.setState({liked: false, numberLikes: numberLikes - 1})
-            });
+        dislikePost(postId, currUserId).then((data) => {
+            that.setState({liked: false, numberLikes: numberLikes - 1})
         });
     }
 
@@ -70,24 +54,9 @@ export default class Post extends Component {
         let {currUserId, postId, numberLikes} = this.state;
         let that = this;
 
-        await fetch('http://localhost:9000/feed/likePost', {
-            method: 'POST', 
-            body: JSON.stringify({
-                userId: currUserId,
-                postId
-            }), 
-            headers: {
-                'Content-Type': 'application/json'
-            },
-        }).then(res => {
-            res.json().then(data => {
-                that.setState({liked: true, numberLikes: numberLikes+1})
-            });
-        })
-    }
-
-    comment = () => {
-        console.log("comment")
+        await likePost(postId, currUserId).then(data => {
+            that.setState({liked: true, numberLikes: numberLikes+1})
+        });
     }
 
     render() {

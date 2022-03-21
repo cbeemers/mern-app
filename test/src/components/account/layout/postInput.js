@@ -9,7 +9,6 @@ export default class PostInput extends Component {
             parentId: props.parentId,
             newPostContent: ''
         }
-        console.log(props.parentId)
         this.createPost = props.createPost;
     }
 
@@ -35,7 +34,7 @@ export default class PostInput extends Component {
                     </div> 
                     <div style={postController}>
                         <p style={{margin: 0}}> {newPostContent.length}/140</p>
-                        <button onClick={() => {this.createPost(newPostContent, parentId); this.setState({newPostContent: ''})}} style={postButton}>Post</button>    
+                        <button onClick={() => {this.createPost(newPostContent); this.setState({newPostContent: ''})}} style={postButton}>Post</button>    
                     </div> 
                 </div>
         );

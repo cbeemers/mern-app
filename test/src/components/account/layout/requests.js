@@ -1,9 +1,6 @@
 import React, {Component} from 'react';
-import { withRouter } from 'react-router';
-import {getCookie} from '../../cookie';
-import Header from '../../layout/Header'
-
-import {search, displayed} from '../../layout/style'
+import Header from '../../layout/Header';
+import { getAllRequests, deleteRequest, acceptRequest, friendshipExists } from '../helpers/functions';
 
 export default class RequestsDisplay extends Component {
 
@@ -28,18 +25,45 @@ export default class RequestsDisplay extends Component {
         let {userId} = this.state;
         let that = this;
 
-        await fetch("http://localhost:9000/friend-requests/getRequests?receiverId="+userId, {
-            method: "GET",
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        }).then(async (res) => {
-            await res.json().then(data => {
-                console.log(data)
-                that.setState({
-                    requests: data
-                })
+        await getAllRequests(userId).then(data => {
+            that.setState({
+                requests: data
             })
+        })
+    }
+
+    respond = async (action, requestId, senderId, value) => {
+        let {userId, userFirst, userLast} = this.state
+
+        let split = value.split('-')
+        let first = split[0]
+        let last = split[1]
+
+        const body = JSON.stringify({
+            sender_id: senderId,
+            sender_first: first,
+            sender_last: last,
+            user_id: userId,
+            user_first: userFirst,
+            user_last: userLast
+        });
+
+        if (action == "accept") {
+            friendshipExists(userId, senderId).then(async data => {
+                if (data['result'] != "found") {
+                    acceptRequest(body);
+                }
+            });
+        }
+
+        this.removeRequest(requestId)
+    }
+
+    removeRequest = async (id) => {
+        let that = this
+
+        deleteRequest(id).then(res => {
+            that.getRequests();
         })
     }
 
@@ -68,59 +92,6 @@ export default class RequestsDisplay extends Component {
                 <div style={{textAlign: "center", padding: "2em"}}><h3 style={{color: "black"}}>No new friend requests.</h3></div>
             )
         }
-    }
-
-    respond = async (action, requestId, senderId, value) => {
-        let {userId, userFirst, userLast} = this.state
-
-        let split = value.split('-')
-        let first = split[0]
-        let last = split[1]
-
-        if (action == "accept") {
-            await fetch("http://localhost:9000/friendships/exists?senderId="+senderId+"&userId="+userId, {
-                method: "GET", 
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-
-            }).then(res => {
-                res.json().then(async data => {
-                    if (data['result'] != "found") {
-                        await fetch("http://localhost:9000/friendships/add", {
-                            method: "POST",
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                sender_id: senderId,
-                                sender_first: first,
-                                sender_last: last,
-                                user_id: userId,
-                                user_first: userFirst,
-                                user_last: userLast
-                            })
-                        });
-                    }
-                })
-            })
-        }
-
-        this.removeRequest(requestId)
-    }
-
-    removeRequest = async (id) => {
-        let that = this
-
-        await fetch("http://localhost:9000/friend-requests/deleteRequest", {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({id})
-        }).then(res => {
-            that.getRequests();
-        })
     }
 
     render() {

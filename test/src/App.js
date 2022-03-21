@@ -8,7 +8,6 @@ import Login from './components/account/login';
 import Weather from './components/pages/weather';
 import Stocks from './components/pages/stocks';
 import Profile from './components/account/userProfile';
-import FriendsPage from './components/account/friends';
 import Home from './components/pages/home';
 import Navbar from './components/layout/navbar'
 
@@ -24,7 +23,6 @@ function App() {
       <Route path="/weather" exact component={Weather}></Route>
       <Route path="/stocks" exact component={Stocks}></Route>
       <Route path="/profile" exact component={Profile}></Route>
-      <Route path="/profile/friends" exact component={FriendsPage}></Route>
       <Footer />
     </Router>
   );

@@ -12,6 +12,7 @@ import Feed from '../account/feed';
 // import { profileContent } from '../layout/style'; 
 import MessageDisplay from '../account/layout/messages'
 import FriendsController from '../controllers/friends-controller'
+import { getProfile, getFeed, getAllFriendships } from '../account/helpers/functions';
 
 // import background from '/background.php';
 
@@ -44,12 +45,8 @@ export default class Home extends Component{
             let that = this;
             
             checkToken(token).then(async userId => {
-
-                await fetch("http://localhost:9000/profiles/getProfile?userId="+userId, {
-                    method: "GET",
-                }).then(async res => {
-                    await res.json().then(async profile => {
-                        console.log(profile);
+                await getProfile(userId).then(async profile => {
+                    await getFeed(userId).then(posts => {
                         that.setState({
                             userId,
                             stocks: profile['stocks'],
@@ -57,8 +54,7 @@ export default class Home extends Component{
                             locations: profile['locations'],
                             firstName: profile['firstName'],
                             lastName: profile['lastName'],
-                            display: <Feed userId={userId} profilePicture={profile['profilePicture']} />
-
+                            display: <Feed userId={userId} profilePicture={profile['profilePicture']} posts={posts} />
                         });
                     });
                 });
@@ -92,25 +88,10 @@ export default class Home extends Component{
 
     displayRequests = async () => {
         let {token, firstName, userId, lastName, profilePicture} = this.state;
-        // let that = this
+
         this.setState({
             display: <RequestsDisplay userPicture={profilePicture} token={token} userLast={lastName} userId={userId} userFirst={firstName}/>
         })
-
-        // await fetch("http://localhost:9000/friend-requests/getRequests?receiverId="+userId, {
-        //     method: "GET",
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //     }
-        // }).then(async (res) => {
-        //     await res.json().then(data => {
-        //         console.log(data)
-        //         that.setState({
-        //             display: <RequestsDisplay userPicture={profilePicture} token={token} requests={data} userLast={userLast} userId={userId} userFirst={user}/>
-        //         })
-        //     })
-        // })
-
     }
 
     displayFriends = async () => {
@@ -120,28 +101,14 @@ export default class Home extends Component{
         
         if (display.type != (<FriendsController />).type) {
             if (token != "") {
-                await fetch("http://localhost:9000/friendships/getAll?id="+userId, {
-                    method: "GET",
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                }).then((res) => {
-                    res.json().then(data => {
-                        that.setState({
-                            display: <FriendsController displayMessages={this.displayMessages} display="friends" userId={userId} token={token} friends={data} firstName={user} lastName={userLast} query="" />,
-                            friendData: data,
-                        })
-                    })
-                })
+                await getAllFriendships(userId).then(data => {
+                    that.setState({
+                        display: <FriendsController displayMessages={this.displayMessages} display="friends" userId={userId} token={token} friends={data} firstName={user} lastName={userLast} query="" />,
+                        friendData: data,
+                    });
+                });
             }
         } 
-        // else {
-        //     let {friendData} = this.state
-        //     await this.setState({display: null})
-        //     await this.setState({display: <FriendsController displayMessages={this.displayMessages} display="friends" userId={userId} friends={friendData['data']} id={userId} firstName={user} lastName={userLast} query="" />
-        //     })
-        // }
-
     }
 
     displayStocks = async () => {
@@ -164,7 +131,7 @@ export default class Home extends Component{
     }
 
     renderButtons = () => {
-        let {token} = this.state
+        let {token} = this.state;
 
         if (token != "") {
             return (
@@ -173,47 +140,28 @@ export default class Home extends Component{
                 <div className="home-button" onClick={this.displayMessages}><h3>Messages</h3></div>
                 <div className="home-button" onClick={this.displayFriends}><h3>Friends</h3></div>
                 </div>
-            )
-        }
-        
+            );
+        } 
     }
 
-    display = () => {
-        
+    render() {
         let {userId, locations, stocks, display} = this.state
-        
 
-        // if (user != "") {
-            return (
+        return (
             <div className="main" style={{minHeight: "-webkit-calc(100%)"}}>
                 <aside className="welcome-aside">
-                    
                     {this.renderButtons()}                    
-
                 </aside>
                 <div className="main-content">{display}</div>
-                
                 <aside className="aside2" >
                     <div style={aside2}>
                         <div className="home-button" onClick={() => {this.setState({display:<Weather userId={userId} favorites={locations} />})}}><h3>Weather</h3></div>
                         <div className="home-button" onClick={() => this.setState({display: <Stock favorites={stocks} userId={userId} />})}><h3>Stocks</h3></div>
                         {/* <div className="home-button"><h3>main</h3></div> */}
-                        
                     </div>
-                    
                 </aside>
             </div>
-            )
-        // }
-        // else {
-        //     return display
-            
-        // }
-    }
-
-    render() {
-        const {user} = this.state
-        return this.display()
+        );
         
     }
 }

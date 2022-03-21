@@ -9,10 +9,9 @@ import StockWidget from '../widgets/stock.widet';
 import StockGraph from '../widgets/graph.widget';
 import CalendarWidget from '../widgets/calendar.widget';
 import Pagination from '../layout/pagination';
-import { getCookie, checkToken } from '../cookie';
+import { addFavoriteStock, searchForStock } from '../account/helpers/functions';
 
 import {account, search, msg, calendar} from '../layout/style';
-import { addColorSet } from '../widgets/canvasjs-2.3.2/canvasjs.min';
 
 export default class Stock extends Component {
     constructor(props) {
@@ -62,27 +61,6 @@ export default class Stock extends Component {
         }
     }
 
-    componentDidMount() {
-        // let token = getCookie('token');
-        // let that = this;
-        // if (token) {
-        //     checkToken(token).then(async userId => {
-        //         await fetch("http://localhost:9000/profiles/getStocks?userId="+userId, {
-        //             method: "GET"
-        //         }).then(async res => {
-        //             await res.json().then(favorites => {
-        //                 that.setState({
-        //                     userId,
-        //                     favorites
-        //                 });
-        //             });
-        //         });
-        //     });
-        // } else {
-        //     this.setState({userId: null})
-        // }
-    }
-
     setMonth = async (id) => {
         id++;
         if (id < 10) { id = "0" + (id); }
@@ -105,9 +83,9 @@ export default class Stock extends Component {
     search = async () => {
         let {query, date, json, userId} = this.state
         if (json == null) {
-            const uri = 'http://localhost:9000/stock?symbol='+query;
-            const response = await fetch(uri);
-            json = await response.json();
+            await searchForStock(query).then(result => {
+                json = result;
+            });
         }
 
         if (json["Error Message"]) {
@@ -168,27 +146,14 @@ export default class Stock extends Component {
         this.drop();
     }
 
-    addFavorite = async() => {
+    addFavorite = async () => {
         let { query, userId } = this.state;
         let that = this;
 
-        await fetch("http://localhost:9000/profiles/addStock", {
-            method: "POST", 
-            body: JSON.stringify({
-                ticker: query,
-                userId, 
-            }),
-            headers: {
-                'Content-Type': 'application/json',
-            }
-
-        }).then(async res => {
-            await res.json().then(favorites => {
-                that.setState({favorites});
-            });
+        await addFavoriteStock(userId, query).then(favorites => {
+            that.setState({favorites});
         });
 
-        // await this.getFavorites();
         await this.createDropdown();
     }
 

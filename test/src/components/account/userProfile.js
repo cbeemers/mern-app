@@ -4,6 +4,8 @@ import {getCookie, checkToken} from '../cookie';
 
 import Header from '../layout/Header';
 import {account, profileContent} from '../layout/style';
+import { getProfile, getUserPosts, editBio, updateProfilePicture } from './helpers/functions';
+
 
 export default class Profile extends Component {
     constructor(props) {
@@ -50,37 +52,27 @@ export default class Profile extends Component {
         }
     }
 
-    getProfile = (userId) => {
+    getProfile = async (userId) => {
         let that = this;
 
-        fetch("http://localhost:9000/profiles/getProfile?userId="+userId, {
-            method: "GET",
-            "Content-Type": "application/json",
-        }).then(res => {
-            res.json().then(data => {
-                console.log(data)
-                that.setState({
-                    firstName: data['firstName'],
-                    lastName: data['lastName'], 
-                    profilePicture: data['profilePicture'], 
-                    joined: data['createdAt'],
-                    stocks: data['stocks'],
-                    cities: data['locations'],
-                    bio: data['bio'],
-                    _id: userId,
-                });
+        await getProfile(userId).then(profile => {
+            that.setState({
+                firstName: profile['firstName'],
+                lastName: profile['lastName'], 
+                profilePicture: profile['profilePicture'], 
+                joined: profile['createdAt'],
+                stocks: profile['stocks'],
+                cities: profile['locations'],
+                bio: profile['bio'],
+                _id: userId,
             });
         });
     }
 
-    getPosts = (userId) => {
+    getPosts = async (userId) => {
         let that = this;
-        fetch('http://localhost:9000/feed/getUserPosts?userId='+userId, {
-            method: 'GET'
-        }).then(async res => {
-            await res.json().then(posts => {
-                console.log(posts)
-            });
+        await getUserPosts(userId).then(posts => {
+            console.log(posts)
         });
     }
 
@@ -114,15 +106,10 @@ export default class Profile extends Component {
             fileData.append('image', fileObject, fileObject.name);
             fileData.enctype = "multipart/form-data"
 
-            await fetch('http://localhost:9000/profiles/updateProfilePicture?userId=' + _id, {
-                method: "POST",
-                body: fileData
-            }).then((res) => {
-                
-                res.json().then(data => {
-                    that.setState({profilePicture: data['picture']})
-                })
-            })
+            await updateProfilePicture(fileData, _id).then(data => {
+                console.log(data)
+                that.setState({profilePicture: data['picture']})
+            });
         }
     }
 
@@ -139,22 +126,8 @@ export default class Profile extends Component {
         let { bio, _id } = this.state;
         let that = this;
 
-        await fetch("http://localhost:9000/profiles/updateBio", {
-            method: 'POST',
-            body: JSON.stringify({
-                bio, 
-                userId: _id
-            }), 
-            headers: {
-                'Content-Type': 'application/json'
-            },
-        }).then(res => {
-            if (res.status == 200) {
-                res.json().then(b => {
-                    console.log(b);
-                    that.setState({editing: false})
-                });
-            } 
+        editBio(bio, _id).then(b => {
+            that.setState({editing: false})
         });
     }
 
@@ -230,55 +203,49 @@ export default class Profile extends Component {
         
         joined = (date.getMonth()+1) + "/" + date.getDate() + "/" + date.getFullYear()
 
-
         return (
             <div style={account}>           
                 <div className="main" style={{minHeight: "100vh"}}>
-                <aside className="aside1" style={{borderTop: "1em solid black", borderBottom: "1em solid black", maxWidth: "25em", justifyContent: 'center'}}>
-                    <div style={{textAlign: "center", marginTop: "4em", justifyContent: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
-                        <div 
-                            onClick={this.changePicture}
-                            onMouseEnter={this.blur}
-                            onMouseLeave={this.removeBlur}
-                        >
-                            <p style={{margin: "0"}}>
-                                <img style={profilePictureStyle} className="profile-picture" src={profilePicture} />
-                            </p>
+                    <aside className="aside1" style={{borderTop: "1em solid black", borderBottom: "1em solid black", maxWidth: "25em", justifyContent: 'center'}}>
+                        <div style={{textAlign: "center", marginTop: "4em", justifyContent: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+                            <div 
+                                onClick={this.changePicture}
+                                onMouseEnter={this.blur}
+                                onMouseLeave={this.removeBlur}
+                            >
+                                <p style={{margin: "0"}}>
+                                    <img style={profilePictureStyle} className="profile-picture" src={profilePicture} />
+                                </p>
+                            </div>
+                            <br></br>
+                            <h2 style={{margin: '1em 0'}}>{firstName} {lastName}</h2>
+                            <div>
+                                {this.displayBio()}
+                            </div>
                         </div>
-                        <br></br>
-                        <h2 style={{margin: '1em 0'}}>{firstName} {lastName}</h2>
-                        <div>
-                            {this.displayBio()}
+                        <div style={{textAlign: "center", marginTop: "2em"}}>Date Joined: {joined}</div>
+
+                    </aside>
+                    <div className="main-content" style={{padding: "2em 0", backgroundColor:"white", border: "1em black", borderStyle: "solid", color:"black"}}>
+
+                    {/* <div className="over"><Link to="/profile/friends" className="friends-link"><h1 style={link}>Friends</h1></Link></div> */}
+
+                        <div id="stock" onClick={this.display} style={content}>
+                            <h1 style={{padding: ".2em 0", float:"left"}}>Stocks</h1>
+                            <button style={drop} id="stock" onClick={this.display}></button>
                         </div>
+                        {displayS}
+
+                        <div id="city" onClick={this.display} style={content}>
+                            <h1 style={{padding: ".2em 0", float:"left"}}>Cities</h1>
+                            <button style={drop} id="city" onClick={this.display}></button>
+                        </div>
+                        {displayC}
+
+                        <div style={content}><h1>Change Password</h1></div>
                     </div>
-                    <div style={{textAlign: "center", marginTop: "2em"}}>Date Joined: {joined}</div>
-
-                </aside>
-                <div className="main-content" style={{padding: "2em 0", backgroundColor:"white", border: "1em black", borderStyle: "solid", color:"black"}}>
-
-                {/* <div className="over"><Link to="/profile/friends" className="friends-link"><h1 style={link}>Friends</h1></Link></div> */}
-
-                    <div id="stock" onClick={this.display} style={content}>
-                        <h1 style={{padding: ".2em 0", float:"left"}}>Stocks</h1>
-                        <button style={drop} id="stock" onClick={this.display}></button>
-                    </div>
-                    {displayS}
-
-                    <div id="city" onClick={this.display} style={content}>
-                        <h1 style={{padding: ".2em 0", float:"left"}}>Cities</h1>
-                        <button style={drop} id="city" onClick={this.display}></button>
-                    </div>
-                    {displayC}
-
-                    <div style={content}><h1>Change Password</h1></div>
-                    
-
                 </div>
-                    
-                </div>
-
             </div>
-            
         );
     }
 }

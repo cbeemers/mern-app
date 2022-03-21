@@ -2,6 +2,7 @@ import React from 'react';
 import Header from '../layout/Header';
 
 import {form_style, label, border, account} from '../layout/style';
+import { createAccount, authenticate } from './helpers/functions';
 
 
 export default class Signup extends React.Component {
@@ -50,25 +51,20 @@ export default class Signup extends React.Component {
 
     handleSubmit = (event) => {
         event.preventDefault();
-        const {password, confirm, message, firstName, lastName} = this.state;
+        const {email, password, confirm, message, firstName, lastName} = this.state;
+        let that = this;
 
         if (password == confirm) {
             if (firstName.length > 0 && lastName.length > 0 && password.length >= 6) {
-                fetch('http://localhost:9000/users/add', {
-                    method: 'POST', 
-                    body: JSON.stringify(this.state),
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-
-                }).then(res => {
-                    if (res.status == 200) {
-                        console.log(res)
-                        window.location.reload(true);
-                    } else if (res.status === 401) {
-                        this.setState({
+                createAccount(JSON.stringify(this.state)).then(async response => {
+                    if (response['serverError']) {
+                        that.setState({message: "Internal server error."});
+                    } else if (response["message"]) {
+                        that.setState({
                             message: "Email already in use!"
                         });
+                    } else {
+                        await authenticate(email, password);
                     }
                 });
             }

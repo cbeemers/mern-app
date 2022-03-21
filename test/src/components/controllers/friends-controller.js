@@ -4,6 +4,7 @@ import FriendsDisplay from '../account/layout/friends'
 import Profile from '../account/layout/profile'
 import Stack from '../stack'
 import Header from '../layout/Header'
+import { addFriend, removeFriend, getAllFriendships } from '../account/helpers/functions'
 
 export default class FriendsController extends Component {
     constructor(props) {
@@ -48,12 +49,12 @@ export default class FriendsController extends Component {
             let exists = await this.friendshipExists(friendship['id'])
     
             if (friendship['id']) {
-                if (this.state.displayComponent.type === (<Profile />).type) {
-                    await this.setState({displayComponent: null})
-                }
+                // if (this.state.displayComponent.type === (<Profile />).type) {
+                this.setState({displayComponent: null})
+                // }
                 let displayComponent = (<Profile bio={friendship['bio']} firstName={friendship['firstName']} lastName={friendship['lastName']} displayMessages={this.displayMessages} addFriend={this.addFriend} friendshipExists={this.friendshipExists} userId={friendship['id']} profilePicture={friendship['profilePicture']} openProfile={this.openProfile} exists={exists} currUser={id} />)
                 stack.enqueue(displayComponent)
-                await this.setState({displayComponent, stack, profileId: friendship['id'], exists, header: null})
+                this.setState({displayComponent, stack, profileId: friendship['id'], exists, header: null})
                 
             }
         }
@@ -74,107 +75,76 @@ export default class FriendsController extends Component {
         return exists;
     }
 
-    displayStackNav = () => {
-
-        if (this.state.stack.index >= 1) {
-
-            return (
-                <div style={{height: "2em", width: "100%", backgroundColor: "#192635", padding: "1em"}}>
-                    <img onClick={this.backPage} style={{height: "2em", width: "2em", borderRadius: "10%"}} src="./img/backArrow.png"/>
-                </div>
-            )
-        }
-
-    }
-
     removeFriend = async (removedId, event) => {
         event.preventDefault()
         const {userId, token, firstName, lastName} = this.state
         let that = this
         
         if (window.confirm("Remove friend?")) {
-            await fetch("http://localhost:9000/friendships/remove?senderId="+userId+"&removedId="+removedId, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                }).then((res) => {
-                    res.json().then(async (result) => {
-                        console.log(result)
-                        if (result['msg'] == "success") {
-                            await fetch("http://localhost:9000/friendships/getAll?id="+userId, {
-                                method: "GET",
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                }
-                            }).then((res) => {
-                                res.json().then(async (data) => {
-                                    console.log(data)
-                                    let displayComponent = (<FriendsDisplay 
-                                        token={token}
-                                        friends={data}
-                                        id={userId}
-                                        firstName={firstName}
-                                        lastName={lastName}
-                                        query=""
-                                        openProfile={that.openProfile}
-                                        type={"user"}
-                                        friendshipExists={that.friendshipExists}
-                                        addFriend={that.addFriend}
-                                        removeFriend={that.removeFriend}
-                                    />)
-                                    await that.setState({
-                                        friends: data['data'],
-                                        displayComponent: null,
-                                    })
-                                    await that.setState({
-                                        displayComponent,
-                                        stack: new Stack(displayComponent)
-                                    })
-                                })
-                            })
-                        }
-                    })
-                })
+            removeFriend(userId, removedId).then(async (result) => {
+                console.log(result)
+                if (result['msg'] == "success") {
+                    getAllFriendships(userId).then(async (data) => {
+                        console.log(data)
+                        let displayComponent = (<FriendsDisplay 
+                            token={token}
+                            friends={data}
+                            id={userId}
+                            firstName={firstName}
+                            lastName={lastName}
+                            query=""
+                            openProfile={that.openProfile}
+                            type={"user"}
+                            friendshipExists={that.friendshipExists}
+                            addFriend={that.addFriend}
+                            removeFriend={that.removeFriend}
+                        />);
+                        that.setState({
+                            friends: data['data'],
+                            displayComponent: null,
+                        });
+                        that.setState({
+                            displayComponent,
+                            stack: new Stack(displayComponent)
+                        });
+                    });
+                }
+            });
         }
     }
 
     addFriend = async (_id, event) => {
-        // const _id = event.target.id
-        const {firstName, lastName, userId} = this.state
+        const {userId} = this.state
 
-        await fetch("http://localhost:9000/friend-requests/sendRequest", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                receiverId: _id, 
-                senderId: userId
-            })
-        }).then(async (res) =>{
-            await res.json().then(data => {
-                console.log(data)
-            })
+        addFriend(userId, _id).then(data => {
+            console.log(data)
         })
     }
 
     backPage = async () => {
         let {stack} = this.state
-        // await this.setState({displayComponent: null})
         let displayComponent = stack.dequeue();
         let header = null
+        
         if (stack.currIndex() == 0) {
             header = <Header title={"Your Friends"} />
         }
+        await this.setState({displayComponent: null})
         await this.setState({stack, displayComponent, header})
     }
 
-    render () {
-        let {stack, displayComponent, header} = this.state
+    displayStackNav = () => {
+        if (this.state.stack.index >= 1) {
+            return (
+                <div style={{height: "2em", width: "100%", backgroundColor: "#192635", padding: "1em"}}>
+                    <img onClick={async () => await this.backPage()} style={{height: "2em", width: "2em", borderRadius: "10%"}} src="./img/backArrow.png"/>
+                </div>
+            )
+        }
+    }
 
-        // let displayComponent = stack.curr()
-        // console.log(displayComponent)
+    render () {
+        let {displayComponent, header} = this.state
 
         return (
             <div>

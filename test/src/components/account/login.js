@@ -1,6 +1,7 @@
 import React from 'react';
 import Header from '../layout/Header';
 import { Redirect } from 'react-router-dom';
+import { authenticate } from './helpers/functions';
 
 import {form_style, label, border} from '../layout/style';
 
@@ -29,33 +30,14 @@ class Login extends React.Component {
         })
     }
 
-    submit = (event) => {
+    submit = async (event) => {
         event.preventDefault();
+        let {email, password} = this.state;
+        let that = this;
 
-        fetch("http://localhost:9000/users/authenticate", {
-            method: 'POST',
-            body: JSON.stringify(this.state),
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        })
-        .then(res => {
-            
-            if (res.status === 200) {
-                let that = this;
-
-                res.json().then(data => {
-    
-                    document.cookie = 'token' + "=" + "bearer " + data['token'];
-                    // that.props.history.push('/');
-                    window.location.reload()
-
-                });
-                
-            } else if (res.status === 401) {
-                this.setState({
-                    message: "Username or password incorrect"
-                });
+        await authenticate(email, password).then(data => {
+            if (data['message']) {
+                that.setState({message: data['message']});
             }
         });
     }

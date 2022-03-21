@@ -4,6 +4,7 @@ import Header from '../../layout/Header'
 import Profile from './profile'
 
 import {search, displayed} from '../../layout/style'
+import { findProfile } from '../helpers/functions';
 
 export default class FriendsDisplay extends Component {
     constructor(props) {
@@ -52,32 +53,18 @@ export default class FriendsDisplay extends Component {
     }
 
     search = async () => {
-        let {query} = this.state
+        let {query, _id} = this.state
         let find = String(query).replace(/ /g, "").toLowerCase()
         let that = this
-        let {_id} = this.state
-        
-        if (this.state.friends.includes(find)) {
-            console.log(query)
-        }
-        // console.log(query)
-        await fetch("http://localhost:9000/profiles/findProfile?userId="+_id+ "&fullName="+find, {
-            method: "GET", 
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        }).then((res) => {
-            res.json().then(data => {
-                // console.log(data['users'])
-                that.setState({searchResults: data['users'], display: "search", header: null})
-                that.setState({header: <Header title={"Results for '"+query+"'"} />})
-            })
+
+        await findProfile(_id, find).then(data => {
+            that.setState({searchResults: data['users'], display: "search", header: null})
+            that.setState({header: <Header title={"Results for '"+query+"'"} />})
         })
     }
 
     handleSubmit = (event) => {
         event.preventDefault();
-
         this.search()
     }
 
