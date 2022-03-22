@@ -95,10 +95,10 @@ router.route('/exists').get(async (req, res) => {
     ]}}, 
     function(err, found) {
         if (found) {
-            res.status(200).json({result: "found"})
+            res.status(200).json(true)
         }
         else {
-            res.status(404).json({result: "none"})
+            res.status(404).json(false)
         }
     })
 

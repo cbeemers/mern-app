@@ -51,8 +51,18 @@ router.route('/getSentRequests').get(async (req, res) => {
     });
 });
 
-router.route('/checkForRequest').get(async (req, res) => {
+router.route('/checkForRequests').get(async (req, res) => {
+    let {receiverId} = req.query;
 
+    FriendRequest.find({receiverId}, async function(err, requests) {
+        if (err) {
+            res.status(200).json(err);
+        } else if (requests.length == 0) {
+            res.status(200).json(false);
+        } else {
+            res.status(200).json(true);
+        }
+    });
 });
 
 router.route('/sendRequest').post(async (req, res) => {

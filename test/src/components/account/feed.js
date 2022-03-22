@@ -8,25 +8,21 @@ export default class Feed extends Component {
     constructor(props) {
         super(props)
 
-        this.state = {
-            userId: props.userId,
-            profilePicture: props.profilePicture,
-            // newPostContent: '',
-            posts: displayPosts(props.posts, props.userId, this),
-            stack: new Stack(null), 
-            parentPost: null, 
-            parentPostId: null
-        }
-    }
+        let posts = displayPosts(props.posts, props.userId, this)
 
-    componentDidMount() {
-        // Get posts
-        let { userId } = this.state;
-        let that = this;
-        
-        // getFeed(userId).then(posts => {
-        //     that.setState({posts: displayPosts(posts, userId, that), stack: new Stack(null)})
-        // });
+        this.state = {
+            userId: props.userId, 
+            profilePicture: props.profilePicture,
+            posts: posts,
+            stack: new Stack({
+                parentPost: null, 
+                posts: posts,
+                parentPostId: null,
+            }), 
+            parentPost: null, 
+            parentPostId: null,
+            displayInput: typeof props.displayInput !== 'undefined'? props.displayInput: true
+        }
     }
 
     createPost = async (newPostContent) => {
@@ -41,19 +37,17 @@ export default class Feed extends Component {
 
         await getComments(post['postId']).then((comments) => {
             let parent = <Post openPost={that.openPost.bind(that)} openProfile={that.openProfile.bind(that)} state={post} />
-
-            stack.enqueue(post['postId'])
-            
             that.setState({posts: [], parentPost: null})
+            
+            stack.enqueue({parentPost: parent, posts: displayPosts(comments, userId, that), parentPostId: post['postId']})
+
             that.setState({
                 parentPost: parent, 
                 parentPostId: post['postId'], 
-                stack, 
+                stack:stack, 
                 posts: displayPosts(comments, userId, that)
             });
         })
-        
-        
     }
 
     openProfile = (e) => {
@@ -65,15 +59,35 @@ export default class Feed extends Component {
         // Retrieve new posts
     }
 
+    backPage = async () => {
+        let {stack} = this.state;
+        let content = stack.dequeue();
+        
+        await this.setState({posts: null, parentPost: null});
+        await this.setState({parentPost: content['parentPost'], posts: content['posts'], parentPostId: content['parentPostId']})
+    }
+
+    displayStack = () => {
+        let {stack} = this.state;
+
+        if (stack.currIndex() > 0) {
+            return (
+                <div style={backButtonContainer}>
+                    <img onClick={async () => await this.backPage()} style={backButton} src={'./img/backArrow.png'} />
+                </div>
+            );
+        }
+        return null;
+    }
+
     render() {
-        let {profilePicture, posts, userId, stack, parentPost, parentPostId} = this.state;
-        let index = stack.currIndex();
-        console.log(index)
+        let {profilePicture, posts, userId, stack, parentPost, parentPostId, displayInput} = this.state;
         
         return (
             <div style={feedContainer}>
+                {this.displayStack()}
                 {parentPost}
-                <PostInput profilePicture={profilePicture} createPost={this.createPost.bind(this)} parentId={parentPostId} />
+                {displayInput? <PostInput profilePicture={profilePicture} createPost={this.createPost.bind(this)} parentId={parentPostId} /> : null}
                 <div style={postContainer}>
                     {posts}
                 </div>
@@ -82,49 +96,21 @@ export default class Feed extends Component {
     }
 }
 
-const feedContainer = {
-    height: '100%',
-    // margin: 10,
+const backButton = {
+    width: 30,
+    height: 30
 }
 
-const postButton = {
-    borderRadius: '30%',
-    height: 40,
-    width: 60,
-    alignSelf: 'flex-end',
-    marginTop: 5,
-    backgroundColor: '#007bff',
-    color: 'white',
-    border: 'none'
+const backButtonContainer = {
+    width: '100%',
+    height: 50,
+    padding: 10
+}
+
+const feedContainer = {
+    height: '100%',
 }
 
 const postContainer = {
     margin: '10px 0'
-}
-
-const postInput = {
-    width: '100%',
-    padding: 10,
-    borderRadius: '2%',
-    resize: 'none'
-}
-
-const postInputContainer = {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center'
-}
-
-const postObjectContainer = {
-    display: 'flex',
-    flexDirection: 'column',
-    margin: 10,
-    
-}
-
-const userProfilePicture = {
-    width: 50,
-    height: 50,
-    borderRadius: '50%',
-    marginRight: 5
 }

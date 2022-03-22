@@ -19,7 +19,7 @@ export default class Post extends Component {
             profilePicture: obj.profilePicture,
             userName: obj.userName, 
             currUserId: obj.currUserId, 
-            liked: false,
+            liked: props.liked? props.liked: false,
         }
         this.openPost = props.openPost;
         this.openProfile = props.openProfile;
@@ -74,11 +74,11 @@ export default class Post extends Component {
                     <div style={timestamp}>
                         {joined}
                     </div>
-                    <img onClick={(e) => this.openProfile(e)} src={profilePicture} style={profilePictureStyle} />
+                    <img onClick={async (e) => await this.openProfile(e)} src={profilePicture} style={profilePictureStyle} />
                     <div style={Object.assign({}, column, postContent)}>
                         {/* post content, username */}
                         <h3>{userName}</h3>
-                        <p style={{width: '90%' }}>{content}</p>
+                        <p style={{width: 300 }}>{content}</p>
 
                     </div>
                 </div>
@@ -149,7 +149,7 @@ const likeCount = {
 }
 
 const postContent = {
-    minWidth: 150,
+    maxWidth: 350,
     height: '100%',
     margin: 10
 }
@@ -157,7 +157,8 @@ const postContent = {
 const postObject = {
     margin: 'auto', 
     marginBottom: 5,
-    width: 400
+    maxWidth: 600,
+    minWidth: 400
 }
 
 const profilePictureStyle = {

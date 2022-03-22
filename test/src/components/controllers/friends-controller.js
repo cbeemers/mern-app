@@ -4,14 +4,13 @@ import FriendsDisplay from '../account/layout/friends'
 import Profile from '../account/layout/profile'
 import Stack from '../stack'
 import Header from '../layout/Header'
-import { addFriend, removeFriend, getAllFriendships } from '../account/helpers/functions'
+import { addFriend, removeFriend, getAllFriendships, friendshipExists } from '../account/helpers/functions'
 
 export default class FriendsController extends Component {
     constructor(props) {
         super(props)
 
         let displayComponent = (<FriendsDisplay 
-            token={props.token}
             friends={props.friends}
             id={props.userId}
             firstName={props.firstName}
@@ -27,19 +26,21 @@ export default class FriendsController extends Component {
         this.state = {
             friends: props.friends,
             query: props.query,
-            display: props.display,
+            display: "friends",
             firstName: props.firstName,
             lastName: props.lastName, 
-            token: props.token,
             stack: new Stack(displayComponent),
             displayComponent,
-            profileId: "",
             exists: true, // If friendship already exists
             userId: props.userId,
             header: <Header title={"Your Friends"} />
         }
 
-        this.displayMessages = this.props.displayMessages.bind()
+        // this.displayMessages = this.props.displayMessages.bind()
+    }
+
+    displayMessages = async () => {
+
     }
 
     openProfile = async (friendship, event) => {
@@ -62,17 +63,13 @@ export default class FriendsController extends Component {
 
     friendshipExists = async (otherId) => {
         let {userId} = this.state;
-        let exists = false;
+        let that = this;;
 
-        await fetch("http://localhost:9000/friendships/exists?senderId="+userId+"&addedId="+otherId, {
-            method: "GET"
-        }).then(res => {
-            if (res.status === 200) {
-                exists = true;
-            }
-        }); 
 
-        return exists;
+        return await friendshipExists(userId, otherId).then(exists => {
+            that.setState({exists});
+            return exists;
+        });
     }
 
     removeFriend = async (removedId, event) => {

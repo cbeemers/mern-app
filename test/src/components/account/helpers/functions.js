@@ -79,6 +79,14 @@ export async function getUserPosts(userId) {
     });
 }
 
+export async function getAllUserLikes(userId) {
+    return await fetch(`http://localhost:9000/feed/getUserLikes?userId=${userId}`, {
+        method: 'GET'
+    }).then(async res => {
+        return await res.json();
+    })
+}
+
 export async function getComments(postId) {
     return await fetch('http://localhost:9000/feed/getComments?postId='+postId, {
         method: 'GET'
@@ -133,7 +141,7 @@ export async function dislikePost(postId, userId) {
 }
 
 export async function didUserLike(postId, userId) {
-    return await fetch('http://localhost:9000/feed/getUserLike?userId='+userId+'&postId='+postId, {
+    return await fetch('http://localhost:9000/feed/didUserLike?userId='+userId+'&postId='+postId, {
             method: 'GET'
         }).then(async res => {
             return await res.json();
@@ -275,6 +283,14 @@ export async function deleteRequest(requestId) {
         }).then(async res => {
             return await res.json();
         });
+}
+
+export async function checkForFriendRequests(userId) {
+    return await fetch(`http://localhost:9000/friend-requests/checkForRequests?receiverId=${userId}`, {
+        method: 'GET'
+    }).then(async res => {
+        return await res.json();
+    });
 }
 
 /**---------------------------------------------------------------------------

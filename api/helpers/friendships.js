@@ -19,8 +19,6 @@ module.exports = async function getAllFriendshipProfiles(id) {
         } else {
             return []
         }
-        
-
     }).then(profiles => {
         let results = [];
         for (let i = 0; i < profiles.length; i++) {

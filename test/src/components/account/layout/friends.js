@@ -23,7 +23,6 @@ export default class FriendsDisplay extends Component {
             firstName: props.firstName,
             lastName: props.lastName, 
             _id: props.id,
-            token: props.token,
             // header,
             profileId: "",
             type: props.type, 

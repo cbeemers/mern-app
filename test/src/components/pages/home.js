@@ -12,15 +12,13 @@ import Feed from '../account/feed';
 // import { profileContent } from '../layout/style'; 
 import MessageDisplay from '../account/layout/messages'
 import FriendsController from '../controllers/friends-controller'
-import { getProfile, getFeed, getAllFriendships } from '../account/helpers/functions';
+import { getProfile, getFeed, getAllFriendships, checkForFriendRequests } from '../account/helpers/functions';
 
 // import background from '/background.php';
 
 export default class Home extends Component{
     constructor(props) {
         super(props);
-
-        // let user = '';
 
         this.state = {
             display: null,
@@ -33,6 +31,7 @@ export default class Home extends Component{
             friendData: null,
             stocks: [],
             locations: [],
+            activeRequest: false,
         }
 
         this.signup = this.signup.bind(this)
@@ -45,6 +44,7 @@ export default class Home extends Component{
             let that = this;
             
             checkToken(token).then(async userId => {
+                await this.checkForRequests(userId);
                 await getProfile(userId).then(async profile => {
                     await getFeed(userId).then(posts => {
                         that.setState({
@@ -71,6 +71,14 @@ export default class Home extends Component{
         }
     }
 
+    checkForRequests = async (userId) => {
+        let that = this;
+
+        await checkForFriendRequests(userId).then(isRequest => {
+            that.setState({activeRequest: isRequest});
+        })
+    }
+
     displayMessages = async (user = undefined) => {
         // console.log("messages")
         let {token, userId, display} = this.state
@@ -90,8 +98,8 @@ export default class Home extends Component{
         let {token, firstName, userId, lastName, profilePicture} = this.state;
 
         this.setState({
-            display: <RequestsDisplay userPicture={profilePicture} token={token} userLast={lastName} userId={userId} userFirst={firstName}/>
-        })
+            display: <RequestsDisplay checkForRequests={this.checkForRequests.bind(this)} userPicture={profilePicture} token={token} userLast={lastName} userId={userId} userFirst={firstName}/>
+        });
     }
 
     displayFriends = async () => {
@@ -131,12 +139,12 @@ export default class Home extends Component{
     }
 
     renderButtons = () => {
-        let {token} = this.state;
+        let {token, activeRequest} = this.state;
 
         if (token != "") {
             return (
                 <div style={{padding: "1em"}}>
-                <div className="home-button" onClick={this.displayRequests}><h3>Requests</h3></div>
+                <div className="home-button" onClick={this.displayRequests}><div style={requestDiv}><h3>Requests</h3><div style={activeRequest? activeRequests: null}></div></div></div>
                 <div className="home-button" onClick={this.displayMessages}><h3>Messages</h3></div>
                 <div className="home-button" onClick={this.displayFriends}><h3>Friends</h3></div>
                 </div>
@@ -167,6 +175,20 @@ export default class Home extends Component{
 }
 
 let background = './img/background4.jpg';
+
+const activeRequests = {
+    width: 15, 
+    height: 15, 
+    borderRadius: '50%',
+    backgroundColor: 'red',
+    alignSelf: 'center', 
+    marginLeft: 10,
+}
+
+const requestDiv = {
+    display: 'flex',
+    flexDirection: 'row',
+}
 
 const main = {
     // borderLeft: ".1em solid #A7C7E7",

@@ -85,7 +85,6 @@ export default class Profile extends Component {
 
     render() {
         let {userId, display, profilePicture, firstName, lastName, bio, joinedDate, posts} = this.state
-        console.log(firstName)
         return (
             <div>
                 <div style={userInfo}>
@@ -148,5 +147,6 @@ const userInfo = {
     justifyContent: 'center',
     alignItems: "center", 
     padding: 10,
+    color: 'white'
 }
 

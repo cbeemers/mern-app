@@ -4,8 +4,10 @@ import {getCookie, checkToken} from '../cookie';
 
 import Header from '../layout/Header';
 import {account, profileContent} from '../layout/style';
-import { getProfile, getUserPosts, editBio, updateProfilePicture } from './helpers/functions';
-
+import { getProfile, getUserPosts, editBio, updateProfilePicture, getAllUserLikes, getAllFriendships } from './helpers/functions';
+import Settings from './layout/settings';
+import Feed from './feed';
+import FriendsController from '../controllers/friends-controller';
 
 export default class Profile extends Component {
     constructor(props) {
@@ -23,11 +25,13 @@ export default class Profile extends Component {
             stockDisplay: false,
             cityDisplay: false,
             fileSelector: document.createElement('input'),
-            token: getCookie('token'),
             _id: "",
             profilePicture: "",
             bio: "",
             editing: false,
+            display: null,
+            firstName: "",
+            lastName: "",
         }
     }
 
@@ -44,11 +48,13 @@ export default class Profile extends Component {
 
         if (token !== "") {
             let that = this;
-            checkToken(token).then(userId => {
+            checkToken(token).then(async userId => {
                 console.log(userId)
-                this.getProfile(userId);
-                this.getPosts(userId);
-            });       
+                await this.getProfile(userId);
+                await this.getPosts(userId);
+            });
+            
+            
         }
     }
 
@@ -65,15 +71,40 @@ export default class Profile extends Component {
                 cities: profile['locations'],
                 bio: profile['bio'],
                 _id: userId,
+                // display: <Settings stocks={profile['stocks']} cities={profile['locations']} />
             });
         });
     }
 
     getPosts = async (userId) => {
+        let {profilePicture} = this.state;
         let that = this;
-        await getUserPosts(userId).then(posts => {
+
+        await getUserPosts(userId).then(async posts => {
             console.log(posts)
+            await that.setState({display: null})
+            await that.setState({display: <Feed userId={userId} posts={posts} profilePicture={profilePicture} />})
         });
+    }
+
+    getUserLikes = async () => {
+        let {_id, profilePicture} = this.state;
+        let that = this;
+
+        await getAllUserLikes(_id).then(data => {
+            that.setState({display: null});
+            that.setState({display: <Feed userId={_id} posts={data} profilePicture={profilePicture} displayInput={false} />})
+        });
+    } 
+
+    getFriends = async () => {
+        let {_id, lastName, firstName} = this.state;
+        let that = this;
+
+        await getAllFriendships(_id).then(friends => {
+            that.setState({display: null});
+            that.setState({display: <FriendsController userId={_id} lastName={lastName} firstName={firstName} friends={friends} />})
+        })
     }
 
     editBio = (e) => {
@@ -113,14 +144,15 @@ export default class Profile extends Component {
         }
     }
 
-    createDisplay = (type) => {
-        let display = this.state[type].map((object, index) => {
-            return (
-            <div style={displayed}><h3 >{object}</h3></div>
-            )
-        });
-        return display
+    displaySettings = async () => {
+        let {stocks, cities} = this.state;
+        this.setState({display: null})
+        this.setState({display: <Settings stocks={stocks} cities={cities} />})
     }
+
+    // displayPosts = async () => {
+    //     let {posts, userId, } = this.state;
+    // }
 
     updateBio = async() => {
         let { bio, _id } = this.state;
@@ -129,24 +161,6 @@ export default class Profile extends Component {
         editBio(bio, _id).then(b => {
             that.setState({editing: false})
         });
-    }
-
-    display = (event) => {
-        let display = []
-        let id = event.target.getAttribute('id')
-
-        if (id == "stock") {
-            if (!this.state.stockDisplay) {
-                display = this.createDisplay("stocks")
-            }
-            this.setState({stockDisplay: !this.state.stockDisplay, displayS: display})
-        }
-        else if (id == "city") {
-            if (!this.state.cityDisplay) {
-                display = this.createDisplay("cities")
-            }
-            this.setState({cityDisplay: !this.state.cityDisplay, displayC: display})
-        }
     }
 
     displayBio = () => {
@@ -198,7 +212,7 @@ export default class Profile extends Component {
 
 
     render() {
-        let {user, joined, displayS, displayC, firstName, lastName, bio, fileSelector, profilePicture} = this.state;
+        let {_id, joined, displayS, display, firstName, lastName, bio, fileSelector, profilePicture} = this.state;
         let date = new Date(joined)
         
         joined = (date.getMonth()+1) + "/" + date.getDate() + "/" + date.getFullYear()
@@ -226,23 +240,46 @@ export default class Profile extends Component {
                         <div style={{textAlign: "center", marginTop: "2em"}}>Date Joined: {joined}</div>
 
                     </aside>
-                    <div className="main-content" style={{padding: "2em 0", backgroundColor:"white", border: "1em black", borderStyle: "solid", color:"black"}}>
-
+                    <div className="main-content" style={{padding: "0 0 2em 0", backgroundColor:"white", border: "1em black", borderStyle: "solid", color:"black"}}>
+                        <div style={mainNav}>
+                            <div style={mainLinks}>
+                                <h4
+                                    style={navLink}
+                                    onMouseEnter={this.blur}
+                                    onMouseLeave={this.removeBlur}
+                                    onClick={() => this.getPosts(_id)}
+                                >
+                                    Posts
+                                </h4>
+                                <h4
+                                    style={navLink}
+                                    onMouseEnter={this.blur}
+                                    onMouseLeave={this.removeBlur}
+                                    onClick={() => this.getUserLikes()}
+                                >
+                                    Likes
+                                </h4>
+                                <h4
+                                    style={navLink}
+                                    onMouseEnter={this.blur}
+                                    onMouseLeave={this.removeBlur}
+                                    onClick={() => this.getFriends()}
+                                >
+                                    Friends
+                                </h4>
+                            </div>
+                            <h4 
+                                style={navLink}
+                                onMouseEnter={this.blur}
+                                onMouseLeave={this.removeBlur}
+                                onClick={() => this.displaySettings()}
+                            >
+                                Settings
+                            </h4>
+                        </div>
                     {/* <div className="over"><Link to="/profile/friends" className="friends-link"><h1 style={link}>Friends</h1></Link></div> */}
+                        {display}
 
-                        <div id="stock" onClick={this.display} style={content}>
-                            <h1 style={{padding: ".2em 0", float:"left"}}>Stocks</h1>
-                            <button style={drop} id="stock" onClick={this.display}></button>
-                        </div>
-                        {displayS}
-
-                        <div id="city" onClick={this.display} style={content}>
-                            <h1 style={{padding: ".2em 0", float:"left"}}>Cities</h1>
-                            <button style={drop} id="city" onClick={this.display}></button>
-                        </div>
-                        {displayC}
-
-                        <div style={content}><h1>Change Password</h1></div>
                     </div>
                 </div>
             </div>
@@ -250,21 +287,7 @@ export default class Profile extends Component {
     }
 }
 
-let link = {
-    color: "black",
-    borderBottom: ".5em black",
-    borderBottomStyle: "solid",
-    borderTop: ".5em black",
-    borderTopStyle: "solid",
-    padding: "1em 0"
-
-}
-
-let profilePictureStyle = {
-    boxShadow: "0em 1em 1em 1em black"
-} 
-
-let bioButton = {
+const bioButton = {
     alignSelf: 'flex-end',
     margin: '0',
     maxHeight: '2em',
@@ -274,45 +297,64 @@ let bioButton = {
     flexDirection: 'row'
 }
 
-let bioChangeButtons = {
+const bioChangeButtons = {
     backgroundColor: '#007bff',
     borderRadius: '20%',
     border: 'none',
     margin: '1em'
 }
 
-let bioContainer = {
+const bioContainer = {
     display: 'flex',
     flexDirection: 'column',
     margin: '0',
     maxWidth: '15em',
-    // alignItems: 'center',
     width: '100%'
 }
 
-let content = {
-    display: "flex",
-    borderBottom: ".25em black", 
-    borderBottomStyle: "solid", 
-    justifyContent: "space-between",
-    padding: "1em", 
-}
-
-let drop = {
-    width: "4em",
-    float:"right", 
-    height: "2em", 
-    marginTop:"auto", 
-    borderRadius: "1em",
-    marginBottom: "auto", 
-    backgroundSize: "100%",
-    backgroundPosition: "center",
-    backgroundImage: "url('./img/arrow.png')",
-}
-
-let displayed = {
+const displayed = {
     padding: ".5em", 
     borderBottom: ".1em black", 
     borderBottomStyle:"solid", 
     color: "black"
 }
+
+const link = {
+    color: "black",
+    borderBottom: ".5em black",
+    borderBottomStyle: "solid",
+    borderTop: ".5em black",
+    borderTopStyle: "solid",
+    padding: "1em 0"
+
+}
+
+const mainLinks = {
+    display: 'flex',
+    flexDirection: 'row',
+    width: '33%', 
+    justifyContent: 'space-between'
+}
+
+const mainNav = {
+    padding: 10,
+    backgroundColor: '#192635',
+    width: '100%',
+    height: 70,
+    borderBottom: '1em solid black',
+    color: 'white',
+    display: 'flex',
+    flexDirection: 'row',
+    textAlign: 'center',
+    margin: 0,
+    justifyContent: 'space-between'
+}
+
+const navLink = {
+    textAlign: 'center',
+    margin: 0
+}
+
+const profilePictureStyle = {
+    boxShadow: "0em 1em 1em 1em black"
+} 

@@ -116,13 +116,12 @@ router.route('/getFeed').get(async (req, res) => {
                 }
             }
             
-
             res.status(200).json(sortPosts(results));
         }
     });
 });
 
-router.route('/getUserLike').get(async (req, res) => {
+router.route('/didUserLike').get(async (req, res) => {
     let {postId, userId} = req.query;
 
     await Like.findOne({postId, userId}, (err, like) => {
@@ -186,8 +185,43 @@ router.route('/getComments').get(async (req, res) => {
 
 });
 
-router.route('/addComment').post((req, res) => {
-    // May not need
+router.route('/getUserLikes').get(async (req, res) => {
+    let {userId} = req.query;
+    let allPosts = [];
+
+    await Like.find({userId}).sort({createdAt: 1}).limit(100).then(likes => {
+        if (likes.length == 0) {
+            res.status(200).json([]);
+        } else {
+            let queries = [];
+            console.log(likes)
+            likes.forEach(like => {
+                queries.push(Post.findOne({_id: like['postId']}))
+            })
+            return Promise.all(queries);
+        }
+    }).then(posts => {
+        let queries = [];
+        allPosts = posts;
+        console.log(posts);
+
+        posts.forEach(post => {
+            queries.push(Profile.findOne({userId: post['userId']}));
+        })
+        return Promise.all(queries);
+
+    }).then(profiles => {
+        let results = [];
+        console.log(profiles)
+        for (let i = 0; i < profiles.length; i++) {
+            let profile = profiles[i];
+            let post = allPosts[i];
+
+            results.push(createPost(profile, post));
+        }
+
+        res.status(200).json(results);
+    });
 });
 
 module.exports = router;

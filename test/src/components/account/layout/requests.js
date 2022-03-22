@@ -15,6 +15,8 @@ export default class RequestsDisplay extends Component {
             userId: props.userId,
             userPicture: props.userPicture,
         }
+
+        this.checkForRequests = props.checkForRequests;
     }
 
     componentDidMount() {
@@ -26,6 +28,9 @@ export default class RequestsDisplay extends Component {
         let that = this;
 
         await getAllRequests(userId).then(data => {
+            if(data.length == 0) {
+                this.checkForRequests(userId);
+            }
             that.setState({
                 requests: data
             })
