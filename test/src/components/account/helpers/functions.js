@@ -320,3 +320,37 @@ export async function searchForStock(ticker) {
         return await res.json();
     })
 }
+
+/**----------------------------------------------------------------------------
+ * MESSAGES
+ ------------------------------------------------------------------------------*/
+
+export async function sendMessage(userId, receiverId, messageContent) {
+    return await fetch('http://localhost:9000/messages/sendMessage', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({userId, receiverId, messageContent})
+    });
+}
+
+export async function getConversation(userId, otherId) {
+    return await fetch(`http://localhost:9000/messages/getConversation?userId=${userId}&otherId=${otherId}`, {
+        method: 'GET'
+    }).then(async res => {
+        return await res.json();
+    });
+}
+
+export async function readMessages(conversationId, receiverId) {
+    return await fetch('http://localhost:9000/messages/readMessages', {
+        method: 'POST',
+        body: JSON.stringify({conversationId, receiverId}),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).then(async res => {
+        return await res.json();
+    })
+}

@@ -5,7 +5,7 @@ import ProfileHeader from '../../layout/profileHeader'
 import FriendsDisplay from '../layout/friends'
 import { checkToken, getCookie } from '../../cookie'
 import Feed from '../feed'
-import { getAllFriendships, displayPosts, getUserPosts } from '../helpers/functions'
+import { getAllFriendships, displayPosts, getUserPosts, sendMessage } from '../helpers/functions'
 
 export default class Profile extends Component {
     constructor(props) {
@@ -84,13 +84,18 @@ export default class Profile extends Component {
     }
 
     render() {
-        let {userId, display, profilePicture, firstName, lastName, bio, joinedDate, posts} = this.state
+        let {userId, currUserId, display, profilePicture, firstName, lastName, bio, joinedDate, posts} = this.state
         return (
             <div>
                 <div style={userInfo}>
                     <img src={profilePicture} style={profilePictureStyle} />
                     <h2>{firstName} {lastName}</h2>
-                    <div style={bioContainer}><p>{bio}</p><div style={messageButtonContainer}><img style={messageButton} src={'./img/msg.png'} /></div></div>
+                    <div style={bioContainer}>
+                        <p>{bio}</p>
+                        <div style={messageButtonContainer}>
+                            <img onClick={() => console.log("message")} style={messageButton} src={'./img/msg.png'} />
+                        </div>
+                    </div>
                     <div onClick={this.getFriends} style={friendsDropdown}>
                         <h3 style={{padding: "1em"}}>Friends</h3>
                         <img style={{height: "2em", width: "2em", borderRadius: "10%"}} src="./img/arrow.png" />

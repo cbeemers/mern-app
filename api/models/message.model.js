@@ -15,7 +15,7 @@ const messageSchema = new SCHEMA({
         type: String,
         required: true,
     },
-    collectionId: {
+    conversationId: {
         type: String,
         required: true
     },

@@ -28,6 +28,7 @@ var preferenceRouter = require('./routes/preferences');
 var profileRouter = require('./routes/profiles');
 var requestRouter = require('./routes/friend-requests');
 var postRouter = require('./routes/feed');
+var messageRouter = require('./routes/messages');
 // var withAuth = require('./routes/middleware')
 
 var app = express();
@@ -72,6 +73,7 @@ app.use('/preferences', preferenceRouter);
 app.use('/profiles', profileRouter);
 app.use('/friend-requests', requestRouter);
 app.use('/feed', postRouter);
+app.use('/messages', messageRouter);
 app.get('/checkToken', (req, res) => {
 
   const token = req.query.token;

@@ -164,9 +164,7 @@ export default class Home extends Component{
                 <aside className="aside2" >
                     <div style={aside2}>
                         <div className="home-button" onClick={() => {this.setState({display:<Weather userId={userId} favorites={locations} />})}}><h3>Weather</h3></div>
-                        <div className="home-button" onClick={() => this.setState({display: <Stock favorites={stocks} userId={userId} />})}><h3>Stocks</h3></div>
-                        {/* <div className="home-button"><h3>main</h3></div> */}
-                    </div>
+                        <div className="home-button" onClick={() => this.setState({display: <Stock favorites={stocks} userId={userId} />})}><h3>Stocks</h3></div>                    </div>
                 </aside>
             </div>
         );

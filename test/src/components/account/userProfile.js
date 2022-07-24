@@ -4,7 +4,7 @@ import {getCookie, checkToken} from '../cookie';
 
 import Header from '../layout/Header';
 import {account, profileContent} from '../layout/style';
-import { getProfile, getUserPosts, editBio, updateProfilePicture, getAllUserLikes, getAllFriendships } from './helpers/functions';
+import { getProfile, getUserPosts, editBio, updateProfilePicture, getAllUserLikes, getAllFriendships, getConversation, readMessages } from './helpers/functions';
 import Settings from './layout/settings';
 import Feed from './feed';
 import FriendsController from '../controllers/friends-controller';
@@ -210,6 +210,18 @@ export default class Profile extends Component {
         }
     }
 
+    test = async () => {
+        let {_id} = this.state;
+
+        // await getConversation(_id, "62382fbc5e56ff86e0501190").then(messages => {
+        //     console.log(messages);
+        // });
+    
+        await readMessages("623a1d8dd84b55a657e8c311", "62382fbc5e56ff86e0501190").then(some => {
+            console.log(some);
+        })
+    }
+
 
     render() {
         let {_id, joined, displayS, display, firstName, lastName, bio, fileSelector, profilePicture} = this.state;
@@ -222,6 +234,7 @@ export default class Profile extends Component {
                 <div className="main" style={{minHeight: "100vh"}}>
                     <aside className="aside1" style={{borderTop: "1em solid black", borderBottom: "1em solid black", maxWidth: "25em", justifyContent: 'center'}}>
                         <div style={{textAlign: "center", marginTop: "4em", justifyContent: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+                            <button onClick={() => this.test()}>test</button>
                             <div 
                                 onClick={this.changePicture}
                                 onMouseEnter={this.blur}

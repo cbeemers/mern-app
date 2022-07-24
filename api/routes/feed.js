@@ -189,7 +189,7 @@ router.route('/getUserLikes').get(async (req, res) => {
     let {userId} = req.query;
     let allPosts = [];
 
-    await Like.find({userId}).sort({createdAt: 1}).limit(100).then(likes => {
+    await Like.find({userId}).sort({createdAt: -1}).limit(100).then(likes => {
         if (likes.length == 0) {
             res.status(200).json([]);
         } else {

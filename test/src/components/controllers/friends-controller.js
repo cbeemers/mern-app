@@ -46,14 +46,14 @@ export default class FriendsController extends Component {
     openProfile = async (friendship, event) => {
 
         if (event.target.title == ""){
-            let {stack, id} = this.state
+            let {stack, userId} = this.state
             let exists = await this.friendshipExists(friendship['id'])
     
             if (friendship['id']) {
                 // if (this.state.displayComponent.type === (<Profile />).type) {
                 this.setState({displayComponent: null})
                 // }
-                let displayComponent = (<Profile bio={friendship['bio']} firstName={friendship['firstName']} lastName={friendship['lastName']} displayMessages={this.displayMessages} addFriend={this.addFriend} friendshipExists={this.friendshipExists} userId={friendship['id']} profilePicture={friendship['profilePicture']} openProfile={this.openProfile} exists={exists} currUser={id} />)
+                let displayComponent = (<Profile bio={friendship['bio']} firstName={friendship['firstName']} lastName={friendship['lastName']} displayMessages={this.displayMessages} addFriend={this.addFriend} friendshipExists={this.friendshipExists} userId={friendship['id']} profilePicture={friendship['profilePicture']} openProfile={this.openProfile} exists={exists} currUser={userId} />)
                 stack.enqueue(displayComponent)
                 this.setState({displayComponent, stack, profileId: friendship['id'], exists, header: null})
                 
